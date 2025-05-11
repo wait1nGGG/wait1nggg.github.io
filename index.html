@@ -2,10 +2,16 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>不要点页面！！</title>
+  <title>なんで春日影やったの!?</title>
   <style>
+    /* 系统级中文字体栈 */
     body {
-      font-family: "Arial", sans-serif;
+      font-family: 
+        "Microsoft YaHei", 
+        "PingFang SC",
+        "Hiragino Sans GB",
+        "WenQuanYi Micro Hei",
+        sans-serif;
       text-align: center;
       background-color: #f0f0f0;
       margin: 0;
@@ -13,17 +19,26 @@
       overflow: hidden;
     }
 
+    /* 警告标题特殊字体设置 */
     #warning-title {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       color: #ff0000;
-      font-size: 60px;
-      font-weight: bold;
+      font-size: 62px;
+      font-weight: 600;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
       z-index: 1001;
       animation: pulse 1.5s infinite;
+      letter-spacing: 1px;
+      -webkit-font-smoothing: antialiased;
+      /* 备选字体设置 */
+      font-family: 
+        "PingFang SC",
+        "Microsoft YaHei",
+        "Noto Sans CJK SC",
+        sans-serif;
     }
 
     .container {
@@ -93,6 +108,8 @@
       100% { transform: translate(-50%, -50%) scale(1); }
     }
   </style>
+  <!-- 预加载思源黑体 -->
+  <link rel="preload" href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@600&display=swap" as="style">
 </head>
 <body>
 
@@ -104,7 +121,7 @@
     <h1>なんで春日影やったの!?</h1>
     <div class="subtitle">为什么要演奏春日影？！</div>
     <div class="subtitle">Why did we play Haruhikage!?</div>
-    <img src="images/haruhikage.png" alt="Haruhikage">
+    <img src="images/haruhikage.png" alt="春日影">
   </div>
 
   <audio id="bg-music" loop>
@@ -122,32 +139,39 @@
     const subtitles = document.querySelectorAll(".subtitle");
     const pageImage = document.querySelector("img");
 
+    // 字体加载保障
+    const loadFont = () => {
+      const fontLink = document.createElement('link');
+      fontLink.href = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@600&display=swap';
+      fontLink.rel = 'stylesheet';
+      document.head.appendChild(fontLink);
+      console.log('[字体] 思源黑体已加载');
+    }
+
     // 初始化设置
     window.addEventListener('DOMContentLoaded', () => {
       audio.volume = 0.5;
       audio.preload = "auto";
       audio.muted = false;
-      console.log("[系统] 音频预加载完成");
-      
-      // 移动端检测
-      if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        console.log("[设备] 移动端设备检测");
-        document.body.classList.add('mobile');
-      }
+      loadFont();
+      console.log("[系统] 初始化完成");
     });
 
     // 播放逻辑
     startBtn.addEventListener("click", async () => {
       try {
         if (audio.readyState < 3) {
-          console.log("[音频] 正在加载音频资源...");
-          audio.load();
+          console.log("[音频] 正在加载音频...");
+          await new Promise(resolve => {
+            audio.addEventListener('loadeddata', resolve);
+            audio.load();
+          });
         }
 
         // iOS 特殊处理
         if (audio.duration === 0) {
           audio.currentTime = 0.1;
-          console.log("[设备] iOS 兼容处理");
+          console.log("[设备] iOS 时间轴修正");
         }
 
         await audio.play();
@@ -161,7 +185,6 @@
           muteBtn.style.display = "block";
           setTimeout(() => muteBtn.style.opacity = 1, 100);
           
-          // 元素动画
           subtitles.forEach((sub, index) => {
             setTimeout(() => {
               sub.style.opacity = 1;
@@ -179,13 +202,13 @@
 
         // 微信浏览器处理
         if (typeof WeixinJSBridge !== "undefined") {
-          console.log("[环境] 微信浏览器检测");
+          console.log("[环境] 微信浏览器适配");
           WeixinJSBridge.invoke('getNetworkType', {}, () => audio.play());
         }
 
       } catch (err) {
         console.error("[错误] 播放失败:", err);
-        console.info("[提示] 需要手动允许音频播放");
+        console.info("[提示] 需要用户交互后重试");
       }
     });
 
@@ -196,12 +219,11 @@
       console.log(`[状态] 静音: ${audio.muted}`);
     });
 
-    // 防止意外点击
-    document.addEventListener('click', (e) => {
-      if (e.target === document.body) {
-        e.preventDefault();
-      }
-    }, true);
+    // 移动端检测
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      console.log("[设备] 移动端适配模式");
+      document.body.style.fontSize = "16px";
+    }
   </script>
 
 </body>
