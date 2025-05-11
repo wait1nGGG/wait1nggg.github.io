@@ -71,6 +71,15 @@
 
   <script>
     const audio = document.getElementById("bg-music");
+
+    audio.addEventListener('canplaythrough', () => {
+      console.log("音频加载成功");
+    });
+
+    audio.addEventListener('error', () => {
+      console.error("音频加载失败");
+    });
+
     const muteBtn = document.getElementById("mute-btn");
 
     muteBtn.addEventListener("click", function() {
