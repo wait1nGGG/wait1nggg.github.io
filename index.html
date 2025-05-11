@@ -47,20 +47,25 @@
       font-size: 14px;
       border-radius: 6px;
       z-index: 1000;
+      display: none;
     }
 
-    #overlay {
+    #start-btn {
       position: fixed;
       inset: 0;
       background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
       z-index: 999;
     }
   </style>
 </head>
 <body>
 
-  <!-- 点击区域，自动播放后移除 -->
-  <div id="overlay"></div>
+  <!-- 透明全屏点击按钮 -->
+  <button id="start-btn" aria-label="开始播放"></button>
 
   <!-- 静音按钮 -->
   <button id="mute-btn">🔊 Mute</button>
@@ -83,24 +88,22 @@
   <script>
     const audio = document.getElementById("bg-music");
     const muteBtn = document.getElementById("mute-btn");
-    const overlay = document.getElementById("overlay");
+    const startBtn = document.getElementById("start-btn");
 
-    // 设置音量并播放
-    const playAudio = () => {
-      audio.volume = 0.4;
+    // 播放音乐并移除全屏透明按钮
+    startBtn.addEventListener("click", () => {
+      audio.volume = 0.5;
       audio.play().then(() => {
         console.log("音频播放成功");
+        startBtn.remove(); // 移除透明按钮
+        muteBtn.style.display = "block"; // 显示静音按钮
       }).catch((err) => {
         console.error("音频播放失败", err);
+        alert("音乐播放失败，请重新点击");
       });
-      overlay.remove(); // 移除点击区域
-    };
+    });
 
-    // 绑定点击（支持 iOS）
-    overlay.addEventListener("click", playAudio, { once: true });
-    overlay.addEventListener("touchstart", playAudio, { once: true });
-
-    // 静音按钮
+    // 静音按钮逻辑
     muteBtn.addEventListener("click", () => {
       audio.muted = !audio.muted;
       muteBtn.textContent = audio.muted ? "🔇 Unmute" : "🔊 Mute";
