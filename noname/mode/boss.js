@@ -1,12 +1,8 @@
-import { lib, game, ui, get, ai, _status } from "../noname.js";
-export const type = "mode";
-/**
- * @type { () => importModeConfig }
- */
-export default () => {
+"use strict";
+game.import("mode", function (lib, game, ui, get, ai, _status) {
 	return {
 		name: "boss",
-		start() {
+		start: function () {
 			"step 0";
 			var playback = localStorage.getItem(lib.configprefix + "playback");
 			if (playback) {
@@ -29,9 +25,15 @@ export default () => {
 			}
 			for (var i in lib.characterPack.mode_boss) {
 				lib.character[i] = lib.characterPack.mode_boss[i];
+				if (!lib.character[i][4]) {
+					lib.character[i][4] = [];
+				}
 			}
+			// for(var i in lib.cardPack.mode_boss){
+			//		lib.card[i]=lib.cardPack.mode_boss[i];
+			// }
 			for (var i in lib.skill) {
-				if (lib.skill[i].seatRelated) {
+				if (lib.skill[i].changeSeat) {
 					lib.skill[i] = {};
 					if (lib.translate[i + "_info"]) {
 						lib.translate[i + "_info"] = "此模式下不可用";
@@ -80,7 +82,7 @@ export default () => {
 			if (lib.storage.current == undefined) lib.storage.current = "boss_hundun";
 			for (var i in lib.character) {
 				var info = lib.character[i];
-				if (info.isBoss) {
+				if (info[4].includes("boss")) {
 					// var cfg=i+'_bossconfig';
 					// if(get.config(cfg)==undefined){
 					//		game.saveConfig(cfg,true,true);
@@ -293,7 +295,12 @@ export default () => {
 					ui.arena.appendChild(player);
 					if (boss.bossinginfo) {
 						var rect = player.getBoundingClientRect();
-						player.style.transform = "translate(" + (boss.bossinginfo[0] - rect.left - rect.width / 2) + "px," + (boss.bossinginfo[1] - rect.top - rect.height / 2) + "px) scale(1.1)";
+						player.style.transform =
+							"translate(" +
+							(boss.bossinginfo[0] - rect.left - rect.width / 2) +
+							"px," +
+							(boss.bossinginfo[1] - rect.top - rect.height / 2) +
+							"px) scale(1.1)";
 						ui.refresh(player);
 						player.style.transition = "";
 						player.style.transform = "";
@@ -353,7 +360,10 @@ export default () => {
 							td.innerHTML = get.translation(game.dead[i]);
 							td = ui.create.div(tr);
 							if (game.dead[i].maxHp > 0) {
-								td.innerHTML = "剩余" + (game.bossinfo.chongzheng - game.dead[i].storage.boss_chongzheng) + "回合";
+								td.innerHTML =
+									"剩余" +
+									(game.bossinfo.chongzheng - game.dead[i].storage.boss_chongzheng) +
+									"回合";
 							} else {
 								td.innerHTML = "无法重整";
 							}
@@ -397,7 +407,12 @@ export default () => {
 			ui.arena.appendChild(boss);
 			if (boss.bossinginfo) {
 				var rect = boss.getBoundingClientRect();
-				boss.style.transform = "translate(" + (boss.bossinginfo[0] - rect.left - rect.width / 2) + "px," + (boss.bossinginfo[1] - rect.top - rect.height / 2) + "px) scale(1.1)";
+				boss.style.transform =
+					"translate(" +
+					(boss.bossinginfo[0] - rect.left - rect.width / 2) +
+					"px," +
+					(boss.bossinginfo[1] - rect.top - rect.height / 2) +
+					"px) scale(1.1)";
 				ui.refresh(boss);
 				boss.style.transition = "";
 				boss.style.transform = "";
@@ -814,793 +829,621 @@ export default () => {
 		},
 		characterPack: {
 			mode_boss: {
-				boss_hundun: {
-					sex: "male",
-					group: "qun",
-					hp: 25,
-					skills: ["boss_xiongshou", "boss_wuzang", "boss_xiangde", "boss_yinzei", "boss_yinzei_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_qiongqi: {
-					sex: "male",
-					group: "qun",
-					hp: "20/25",
-					skills: ["boss_xiongshou", "boss_zhue", "boss_futai", "boss_yandu", "boss_yandu_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_taotie: {
-					sex: "male",
-					group: "qun",
-					hp: 20,
-					skills: ["boss_xiongshou", "boss_tanyu", "boss_cangmu", "boss_jicai", "boss_jicai_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_taowu: {
-					sex: "male",
-					group: "qun",
-					hp: 25,
-					skills: ["boss_xiongshou", "boss_minwan", "boss_nitai", "boss_luanchang", "boss_luanchang_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_zhuyin: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_xiongshou"],
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
+				boss_hundun: [
+					"male",
+					"qun",
+					25,
+					["boss_xiongshou", "boss_wuzang", "boss_xiangde", "boss_yinzei", "boss_yinzei_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_qiongqi: [
+					"male",
+					"qun",
+					"20/25",
+					["boss_xiongshou", "boss_zhue", "boss_futai", "boss_yandu", "boss_yandu_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_taotie: [
+					"male",
+					"qun",
+					20,
+					["boss_xiongshou", "boss_tanyu", "boss_cangmu", "boss_jicai", "boss_jicai_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_taowu: [
+					"male",
+					"qun",
+					25,
+					[
+						"boss_xiongshou",
+						"boss_minwan",
+						"boss_nitai",
+						"boss_luanchang",
+						"boss_luanchang_switch",
+					],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_zhuyin: [
+					"male",
+					"qun",
+					4,
+					["boss_xiongshou"],
+					["qun", "hiddenboss", "bossallowed"],
+					"qun",
+				],
 
-				boss_xiangliu: {
-					sex: "male",
-					group: "qun",
-					hp: 25,
-					skills: ["boss_yaoshou", "boss_duqu", "boss_jiushou", "boss_echou", "boss_echou_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_zhuyan: {
-					sex: "male",
-					group: "qun",
-					hp: "25/30",
-					skills: ["boss_yaoshou", "boss_bingxian", "boss_juyuan", "boss_xushi", "boss_xushi_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_bifang: {
-					sex: "male",
-					group: "qun",
-					hp: 25,
-					skills: ["boss_yaoshou", "boss_zhaohuo", "boss_honglianx", "boss_yanyu", "boss_yanyu_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_yingzhao: {
-					sex: "male",
-					group: "qun",
-					hp: 25,
-					skills: ["boss_yaoshou", "boss_fengdong", "boss_xunyou", "boss_sipu", "boss_sipu_switch"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
+				boss_xiangliu: [
+					"male",
+					"qun",
+					25,
+					["boss_yaoshou", "boss_duqu", "boss_jiushou", "boss_echou", "boss_echou_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_zhuyan: [
+					"male",
+					"qun",
+					"25/30",
+					["boss_yaoshou", "boss_bingxian", "boss_juyuan", "boss_xushi", "boss_xushi_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_bifang: [
+					"male",
+					"qun",
+					25,
+					["boss_yaoshou", "boss_zhaohuo", "boss_honglianx", "boss_yanyu", "boss_yanyu_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_yingzhao: [
+					"male",
+					"qun",
+					25,
+					["boss_yaoshou", "boss_fengdong", "boss_xunyou", "boss_sipu", "boss_sipu_switch"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
 
-				boss_qingmushilian: {
-					sex: "male",
-					group: "",
-					hp: 0,
-					skills: ["boss_qingmu", "boss_qingmu_intro1", "boss_qingmu_intro2", "boss_qingmu_intro3"],
-					isBoss: true,
-					extraModeData: "wu",
-				},
-				boss_qinglong: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_shenyi", "releiji", "boss_qingmu2"],
-					groupInGuozhan: "wu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_mushengoumang: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_shenyi", "boss_buchun", "boss_qingmu3"],
-					groupInGuozhan: "wu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_shujing: {
-					sex: "female",
-					group: "shen",
-					hp: 2,
-					skills: ["boss_cuidu"],
-					groupInGuozhan: "wu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_taihao: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["boss_shenyi", "boss_shenen", "boss_qingyi"],
-					groupInGuozhan: "wu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
+				boss_qingmushilian: [
+					"male",
+					"",
+					0,
+					["boss_qingmu", "boss_qingmu_intro1", "boss_qingmu_intro2", "boss_qingmu_intro3"],
+					["boss"],
+					"wu",
+				],
+				boss_qinglong: [
+					"male",
+					"qun",
+					4,
+					["boss_shenyi", "releiji", "boss_qingmu2"],
+					["wu", "hiddenboss", "bossallowed"],
+				],
+				boss_mushengoumang: [
+					"male",
+					"shen",
+					5,
+					["boss_shenyi", "boss_buchun", "boss_qingmu3"],
+					["wu", "hiddenboss", "bossallowed"],
+				],
+				boss_shujing: ["female", "shen", 2, ["boss_cuidu"], ["wu", "hiddenboss", "bossallowed"]],
+				boss_taihao: [
+					"male",
+					"shen",
+					6,
+					["boss_shenyi", "boss_shenen", "boss_qingyi"],
+					["wu", "hiddenboss", "bossallowed"],
+				],
 
-				boss_chiyanshilian: {
-					sex: "male",
-					group: "",
-					hp: 0,
-					skills: ["boss_chiyan", "boss_chiyan_intro1", "boss_chiyan_intro2", "boss_chiyan_intro3"],
-					isBoss: true,
-					extraModeData: "zhu",
-				},
-				boss_zhuque: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_shenyi", "boss_fentian", "boss_chiyan2"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_huoshenzhurong: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_shenyi", "boss_xingxia", "boss_chiyan3"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_yanling: {
-					sex: "male",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_huihuo", "boss_furan"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_yandi: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["boss_shenyi", "boss_shenen", "boss_chiyi"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
+				boss_chiyanshilian: [
+					"male",
+					"",
+					0,
+					["boss_chiyan", "boss_chiyan_intro1", "boss_chiyan_intro2", "boss_chiyan_intro3"],
+					["boss"],
+					"zhu",
+				],
+				boss_zhuque: [
+					"female",
+					"shen",
+					4,
+					["boss_shenyi", "boss_fentian", "boss_chiyan2"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_huoshenzhurong: [
+					"male",
+					"shen",
+					5,
+					["boss_shenyi", "boss_xingxia", "boss_chiyan3"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_yanling: [
+					"male",
+					"shen",
+					4,
+					["boss_huihuo", "boss_furan"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_yandi: [
+					"male",
+					"shen",
+					6,
+					["boss_shenyi", "boss_shenen", "boss_chiyi"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
 
-				boss_baimangshilian: {
-					sex: "male",
-					group: "",
-					hp: 0,
-					skills: ["boss_baimang", "boss_baimang_intro1", "boss_baimang_intro2", "boss_baimang_intro3"],
-					isBoss: true,
-					extraModeData: "qun",
-				},
-				boss_baihu: {
-					sex: "male",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_shenyi", "boss_kuangxiao", "boss_baimang2"],
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_jinshenrushou: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_shenyi", "boss_xingqiu", "boss_baimang3"],
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_mingxingzhu: {
-					sex: "female",
-					group: "shen",
-					hp: 3,
-					skills: ["boss_qingzhu", "boss_jiazu", "boss_jiding"],
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_shaohao: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["boss_shenyi", "boss_shenen", "boss_baiyi"],
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
+				boss_baimangshilian: [
+					"male",
+					"",
+					0,
+					["boss_baimang", "boss_baimang_intro1", "boss_baimang_intro2", "boss_baimang_intro3"],
+					["boss"],
+					"qun",
+				],
+				boss_baihu: [
+					"male",
+					"shen",
+					4,
+					["boss_shenyi", "boss_kuangxiao", "boss_baimang2"],
+					["qun", "hiddenboss", "bossallowed"],
+				],
+				boss_jinshenrushou: [
+					"male",
+					"shen",
+					5,
+					["boss_shenyi", "boss_xingqiu", "boss_baimang3"],
+					["qun", "hiddenboss", "bossallowed"],
+				],
+				boss_mingxingzhu: [
+					"female",
+					"shen",
+					3,
+					["boss_qingzhu", "boss_jiazu", "boss_jiding"],
+					["qun", "hiddenboss", "bossallowed"],
+				],
+				boss_shaohao: [
+					"male",
+					"shen",
+					6,
+					["boss_shenyi", "boss_shenen", "boss_baiyi"],
+					["qun", "hiddenboss", "bossallowed"],
+				],
 
-				boss_xuanlinshilian: {
-					sex: "male",
-					group: "",
-					hp: 0,
-					skills: ["boss_xuanlin", "boss_xuanlin_intro1", "boss_xuanlin_intro2", "boss_xuanlin_intro3"],
-					isBoss: true,
-					extraModeData: "wei",
-				},
-				boss_xuanwu: {
-					sex: "male",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_shenyi", "boss_lingqu", "boss_xuanlin2"],
-					groupInGuozhan: "wei",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_shuishengonggong: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_shenyi", "boss_juehong", "boss_xuanlin3"],
-					groupInGuozhan: "wei",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_shuishenxuanming: {
-					sex: "female",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_shenyi", "boss_zirun", "boss_xuanlin3"],
-					groupInGuozhan: "wei",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_zhuanxu: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["boss_shenyi", "boss_shenen", "boss_zaoyi"],
-					groupInGuozhan: "wei",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
+				boss_xuanlinshilian: [
+					"male",
+					"",
+					0,
+					["boss_xuanlin", "boss_xuanlin_intro1", "boss_xuanlin_intro2", "boss_xuanlin_intro3"],
+					["boss"],
+					"wei",
+				],
+				boss_xuanwu: [
+					"male",
+					"shen",
+					4,
+					["boss_shenyi", "boss_lingqu", "boss_xuanlin2"],
+					["wei", "hiddenboss", "bossallowed"],
+				],
+				boss_shuishengonggong: [
+					"male",
+					"shen",
+					5,
+					["boss_shenyi", "boss_juehong", "boss_xuanlin3"],
+					["wei", "hiddenboss", "bossallowed"],
+				],
+				boss_shuishenxuanming: [
+					"female",
+					"shen",
+					5,
+					["boss_shenyi", "boss_zirun", "boss_xuanlin3"],
+					["wei", "hiddenboss", "bossallowed"],
+				],
+				boss_zhuanxu: [
+					"male",
+					"shen",
+					6,
+					["boss_shenyi", "boss_shenen", "boss_zaoyi"],
+					["wei", "hiddenboss", "bossallowed"],
+				],
 
-				boss_zhuoguiquxie: {
-					sex: "male",
-					group: "",
-					hp: 0,
-					skills: ["boss_bianshen", "boss_bianshen_intro1", "boss_bianshen_intro2", "boss_bianshen_intro3", "boss_bianshen_intro4"],
-					isBoss: true,
-					extraModeData: "shu",
-				},
-				boss_nianshou_heti: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_nianrui", "boss_mengtai", "boss_nbianshen", "boss_nbianshenx"],
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_nianshou_jingjue: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_nianrui", "boss_mengtai", "boss_jingjue", "boss_nbianshen"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_nianshou_renxing: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_nianrui", "boss_mengtai", "boss_renxing", "boss_nbianshen"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_nianshou_ruizhi: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_nianrui", "boss_mengtai", "boss_ruizhi", "boss_nbianshen"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_nianshou_baonu: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_nianrui", "boss_mengtai", "boss_nbaonu", "boss_shouyi", "boss_nbianshen"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
+				boss_zhuoguiquxie: [
+					"male",
+					"",
+					0,
+					[
+						"boss_bianshen",
+						"boss_bianshen_intro1",
+						"boss_bianshen_intro2",
+						"boss_bianshen_intro3",
+						"boss_bianshen_intro4",
+					],
+					["boss"],
+					"shu",
+				],
+				boss_nianshou_heti: [
+					"male",
+					"shen",
+					12,
+					["boss_nianrui", "boss_mengtai", "boss_nbianshen", "boss_nbianshenx"],
+					["shu", "boss", "bossallowed"],
+					"shu",
+				],
+				boss_nianshou_jingjue: [
+					"male",
+					"shen",
+					12,
+					["boss_nianrui", "boss_mengtai", "boss_jingjue", "boss_nbianshen"],
+					["shu", "hiddenboss", "bossallowed"],
+					"shu",
+				],
+				boss_nianshou_renxing: [
+					"male",
+					"shen",
+					12,
+					["boss_nianrui", "boss_mengtai", "boss_renxing", "boss_nbianshen"],
+					["shu", "hiddenboss", "bossallowed"],
+					"shu",
+				],
+				boss_nianshou_ruizhi: [
+					"male",
+					"shen",
+					12,
+					["boss_nianrui", "boss_mengtai", "boss_ruizhi", "boss_nbianshen"],
+					["shu", "hiddenboss", "bossallowed"],
+					"shu",
+				],
+				boss_nianshou_baonu: [
+					"male",
+					"shen",
+					12,
+					["boss_nianrui", "boss_mengtai", "boss_nbaonu", "boss_shouyi", "boss_nbianshen"],
+					["shu", "hiddenboss", "bossallowed"],
+					"shu",
+				],
 
-				boss_baiwuchang: {
-					sex: "male",
-					group: "shen",
-					hp: 9,
-					skills: ["boss_baolian", "boss_qiangzheng", "boss_zuijiu", "juece", "boss_bianshen4"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_heiwuchang: {
-					sex: "male",
-					group: "shen",
-					hp: 9,
-					skills: ["boss_guiji", "boss_taiping", "boss_suoming", "boss_xixing", "boss_bianshen4"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_luocha: {
-					sex: "female",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_modao", "boss_yushou", "yizhong", "boss_moyany"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_yecha: {
-					sex: "male",
-					group: "shen",
-					hp: 11,
-					skills: ["boss_modao", "boss_mojian", "bazhen", "boss_danshu"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_niutou: {
-					sex: "male",
-					group: "shen",
-					hp: 7,
-					skills: ["boss_baolian", "niepan", "boss_manjia", "boss_xiaoshou", "boss_bianshen3"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_mamian: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["boss_guiji", "fankui", "boss_lianyu", "juece", "boss_bianshen3"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_chi: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_guimei", "boss_didong", "boss_shanbeng", "boss_bianshen2"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_mo: {
-					sex: "female",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_guimei", "enyuan", "boss_beiming", "boss_bianshen2"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_wang: {
-					sex: "male",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_guimei", "boss_luolei", "huilei", "boss_bianshen2"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_liang: {
-					sex: "female",
-					group: "shen",
-					hp: 5,
-					skills: ["boss_guimei", "boss_guihuo", "boss_minbao", "boss_bianshen2"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
+				boss_baiwuchang: [
+					"male",
+					"shen",
+					9,
+					["boss_baolian", "boss_qiangzheng", "boss_zuijiu", "juece", "boss_bianshen4"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_heiwuchang: [
+					"male",
+					"shen",
+					9,
+					["boss_guiji", "boss_taiping", "boss_suoming", "boss_xixing", "boss_bianshen4"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_luocha: [
+					"female",
+					"shen",
+					12,
+					["boss_modao", "boss_yushou", "yizhong", "boss_moyany"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_yecha: [
+					"male",
+					"shen",
+					11,
+					["boss_modao", "boss_mojian", "bazhen", "boss_danshu"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_niutou: [
+					"male",
+					"shen",
+					7,
+					["boss_baolian", "niepan", "boss_manjia", "boss_xiaoshou", "boss_bianshen3"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_mamian: [
+					"male",
+					"shen",
+					6,
+					["boss_guiji", "fankui", "boss_lianyu", "juece", "boss_bianshen3"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_chi: [
+					"male",
+					"shen",
+					5,
+					["boss_guimei", "boss_didong", "boss_shanbeng", "boss_bianshen2"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_mo: [
+					"female",
+					"shen",
+					5,
+					["boss_guimei", "enyuan", "boss_beiming", "boss_bianshen2"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_wang: [
+					"male",
+					"shen",
+					5,
+					["boss_guimei", "boss_luolei", "huilei", "boss_bianshen2"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_liang: [
+					"female",
+					"shen",
+					5,
+					["boss_guimei", "boss_guihuo", "boss_minbao", "boss_bianshen2"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
 
-				boss_qinguangwang: {
-					sex: "male",
-					group: "qun",
-					hp: 3,
-					skills: ["boss_panguan", "boss_juhun", "boss_wangxiang", "boss_newhuanren"],
-					names: "蒋|子文",
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_chujiangwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["weimu", "refankui", "boss_bingfeng"],
-					names: "厉|温",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_songdiwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_heisheng", "boss_shengfu", "enyuan"],
-					names: "余|懃",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_wuguanwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_zhiwang", "boss_gongzheng", "boss_xuechi"],
-					names: "吕|岱",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_yanluowang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_tiemian", "boss_zhadao", "boss_zhuxin"],
-					names: "包|拯",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_bianchengwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_leizhou", "boss_leifu", "boss_leizhu"],
-					names: "毕|元宾",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_taishanwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_fudu", "boss_kujiu", "boss_renao"],
-					names: "董|和",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_dushiwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_remen", "boss_zhifen", "boss_huoxing"],
-					names: "黄|中庸",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_pingdengwang: {
-					sex: "male",
-					group: "qun",
-					hp: 4,
-					skills: ["boss_suozu", "boss_abi", "boss_pingdeng"],
-					names: "陆|游",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_zhuanlunwang: {
-					sex: "male",
-					group: "qun",
-					hp: 6,
-					skills: ["boss_modao", "boss_lunhui", "boss_wangsheng", "boss_zlfanshi"],
-					names: "薛|礼",
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_mengpo: {
-					sex: "female",
-					group: "qun",
-					hp: 3,
-					skills: ["boss_shiyou", "boss_wanghun", "boss_wangshi"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_dizangwang: {
-					sex: "male",
-					group: "qun",
-					hp: 8,
-					skills: ["boss_bufo", "boss_wuliang", "boss_dayuan", "boss_diting"],
-					groupInGuozhan: "shu",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-				},
-				boss_shikieiki: {
-					sex: "female",
-					group: "qun",
-					hp: 8,
-					skills: ["boss_yingzhong"],
-					names: "夜魔仙那度|四季映姬",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isHiddenBoss: false,
-					isBossAllowed: true,
-				},
+				boss_qinguangwang: [
+					"male",
+					"qun",
+					3,
+					["boss_panguan", "boss_juhun", "boss_wangxiang", "boss_newhuanren"],
+					["shu", "boss", "bossallowed"],
+					"shu",
+				],
+				boss_chujiangwang: [
+					"male",
+					"qun",
+					4,
+					["weimu", "refankui", "boss_bingfeng"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_songdiwang: [
+					"male",
+					"qun",
+					4,
+					["boss_heisheng", "boss_shengfu", "enyuan"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_wuguanwang: [
+					"male",
+					"qun",
+					4,
+					["boss_zhiwang", "boss_gongzheng", "boss_xuechi"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_yanluowang: [
+					"male",
+					"qun",
+					4,
+					["boss_tiemian", "boss_zhadao", "boss_zhuxin"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_bianchengwang: [
+					"male",
+					"qun",
+					4,
+					["boss_leizhou", "boss_leifu", "boss_leizhu"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_taishanwang: [
+					"male",
+					"qun",
+					4,
+					["boss_fudu", "boss_kujiu", "boss_renao"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_dushiwang: [
+					"male",
+					"qun",
+					4,
+					["boss_remen", "boss_zhifen", "boss_huoxing"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_pingdengwang: [
+					"male",
+					"qun",
+					4,
+					["boss_suozu", "boss_abi", "boss_pingdeng"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_zhuanlunwang: [
+					"male",
+					"qun",
+					6,
+					["boss_modao", "boss_lunhui", "boss_wangsheng", "boss_zlfanshi"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_mengpo: [
+					"female",
+					"qun",
+					3,
+					["boss_shiyou", "boss_wanghun", "boss_wangshi"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				boss_dizangwang: [
+					"male",
+					"qun",
+					8,
+					["boss_bufo", "boss_wuliang", "boss_dayuan", "boss_diting"],
+					["shu", "hiddenboss", "bossallowed"],
+				],
+				//boss_shikieiki:['female','qun',8,['boss_yingzhong'],['qun','hiddenboss','bossallowed']],
 
-				boss_lvbu1: {
-					sex: "male",
-					group: "shen",
-					hp: 8,
-					skills: ["mashu", "wushuang", "boss_baonu", "boss_jingjia", "boss_aozhan"],
-					names: "吕|布",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_lvbu2: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["mashu", "wushuang", "xiuluo", "shenwei", "shenji"],
-					names: "吕|布",
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_lvbu3: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["wushuang", "shenqu", "jiwu"],
-					names: "吕|布",
-					groupInGuozhan: "qun",
-					isHiddenBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
+				boss_lvbu1: [
+					"male",
+					"shen",
+					8,
+					["mashu", "wushuang", "boss_baonu", "boss_jingjia", "boss_aozhan"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_lvbu2: [
+					"male",
+					"shen",
+					6,
+					["mashu", "wushuang", "xiuluo", "shenwei", "shenji"],
+					["qun", "hiddenboss", "bossallowed"],
+					"qun",
+				],
+				boss_lvbu3: [
+					"male",
+					"shen",
+					6,
+					["wushuang", "shenqu", "jiwu"],
+					["qun", "hiddenboss", "bossallowed"],
+					"qun",
+				],
 
-				boss_caocao: {
-					sex: "male",
-					group: "shen",
-					hp: 12,
-					skills: ["boss_guixin", "xiongcai"],
-					names: "曹|操",
-					groupInGuozhan: "wei",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wei",
-				},
-				boss_guojia: {
-					sex: "male",
-					group: "shen",
-					hp: 4,
-					skills: ["tiandu", "boss_guimou", "boss_yuance", "boss_qizuo"],
-					names: "郭|嘉",
-					groupInGuozhan: "wei",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "zhu",
-				},
-				boss_zhangchunhua: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["jueqing", "boss_wuxin", "shangshix"],
-					names: "张|春华",
-					groupInGuozhan: "wei",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wei",
-				},
-				boss_zhenji: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["tashui", "lingbo", "jiaoxia", "fanghua"],
-					names: "甄|宓",
-					groupInGuozhan: "wei",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wei",
-				},
+				boss_caocao: [
+					"male",
+					"shen",
+					12,
+					["boss_guixin", "xiongcai"],
+					["wei", "boss", "bossallowed"],
+					"wei",
+				],
+				boss_guojia: [
+					"male",
+					"shen",
+					4,
+					["tiandu", "boss_guimou", "boss_yuance", "boss_qizuo"],
+					["wei", "boss", "bossallowed"],
+					"zhu",
+				],
+				boss_zhangchunhua: [
+					"female",
+					"shen",
+					4,
+					["jueqing", "boss_wuxin", "shangshix"],
+					["wei", "boss", "bossallowed"],
+					"wei",
+				],
+				boss_zhenji: [
+					"female",
+					"shen",
+					4,
+					["tashui", "lingbo", "jiaoxia", "fanghua"],
+					["wei", "boss", "bossallowed"],
+					"wei",
+				],
 
-				boss_liubei: {
-					sex: "male",
-					group: "shen",
-					hp: 8,
-					skills: ["xiaoxiong", "boss_zhangwu"],
-					names: "刘|备",
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_zhugeliang: {
-					sex: "male",
-					group: "shen",
-					hp: "Infinity/Infinity",
-					skills: ["xiangxing", "yueyin", "fengqi", "gaiming"],
-					names: "诸葛|亮",
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_huangyueying: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_gongshen", "boss_jizhi", "qicai", "boss_guiyin"],
-					names: "黄|月英",
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wei",
-				},
-				boss_pangtong: {
-					sex: "male",
-					group: "shen",
-					hp: 4,
-					skills: ["boss_tianyu", "qiwu", "niepan", "boss_yuhuo"],
-					names: "庞|统",
-					groupInGuozhan: "shu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "zhu",
-				},
+				boss_liubei: [
+					"male",
+					"shen",
+					8,
+					["xiaoxiong", "boss_zhangwu"],
+					["shu", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_zhugeliang: [
+					"male",
+					"shen",
+					Infinity,
+					["xiangxing", "yueyin", "fengqi", "gaiming"],
+					["shu", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_huangyueying: [
+					"female",
+					"shen",
+					4,
+					["boss_gongshen", "boss_jizhi", "qicai", "boss_guiyin"],
+					["shu", "boss", "bossallowed"],
+					"wei",
+				],
+				boss_pangtong: [
+					"male",
+					"shen",
+					4,
+					["boss_tianyu", "qiwu", "niepan", "boss_yuhuo"],
+					["shu", "boss", "bossallowed"],
+					"zhu",
+				],
 
-				boss_zhouyu: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["huoshen", "boss_honglian", "boss_xianyin"],
-					names: "周|瑜",
-					groupInGuozhan: "wu",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "zhu",
-				},
+				boss_zhouyu: [
+					"male",
+					"shen",
+					6,
+					["huoshen", "boss_honglian", "boss_xianyin"],
+					["wu", "boss", "bossallowed"],
+					"zhu",
+				],
 
-				boss_caiwenji: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["beige", "boss_hujia", "boss_guihan"],
-					names: "蔡|琰",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wei",
-				},
-				boss_zhangjiao: {
-					sex: "male",
-					group: "shen",
-					hp: 8,
-					skills: ["boss_leiji", "tiandao", "jidian"],
-					names: "张|角",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
-				boss_zuoci: {
-					sex: "male",
-					group: "shen",
-					hp: 0,
-					skills: ["huanhua"],
-					names: "左|慈",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
+				boss_caiwenji: [
+					"female",
+					"shen",
+					4,
+					["beige", "boss_hujia", "boss_guihan"],
+					["qun", "boss", "bossallowed"],
+					"wei",
+				],
+				boss_zhangjiao: [
+					"male",
+					"shen",
+					8,
+					["boss_leiji", "tiandao", "jidian"],
+					["qun", "boss", "bossallowed"],
+					"shu",
+				],
+				boss_zuoci: ["male", "shen", 0, ["huanhua"], ["qun", "boss", "bossallowed"], "shu"],
 
-				boss_diaochan: {
-					sex: "female",
-					group: "shen",
-					hp: 4,
-					skills: ["fengwu", "yunshen", "lianji", "boss_wange", "yuehun"],
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "qun",
-				},
-				boss_huatuo: {
-					sex: "male",
-					group: "shen",
-					hp: 6,
-					skills: ["chulao", "mazui", "boss_shengshou", "guizhen", "wuqin"],
-					names: "华|佗",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "wu",
-				},
-				boss_dongzhuo: {
-					sex: "male",
-					group: "shen",
-					hp: 20,
-					skills: ["jiuchi", "boss_qiangzheng", "boss_baolin"],
-					names: "董|卓",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					extraModeData: "shu",
-				},
+				boss_diaochan: [
+					"female",
+					"shen",
+					4,
+					["fengwu", "yunshen", "lianji", "boss_wange", "yuehun"],
+					["qun", "boss", "bossallowed"],
+					"qun",
+				],
+				boss_huatuo: [
+					"male",
+					"shen",
+					6,
+					["chulao", "mazui", "boss_shengshou", "guizhen", "wuqin"],
+					["qun", "boss", "bossallowed"],
+					"wu",
+				],
+				boss_dongzhuo: [
+					"male",
+					"shen",
+					20,
+					["jiuchi", "boss_qiangzheng", "boss_baolin"],
+					["qun", "boss", "bossallowed"],
+					"shu",
+				],
 
-				boss_sunce: {
-					sex: "male",
-					group: "shen",
-					hp: "1/8",
-					skills: ["boss_jiang", "boss_hunzi", "boss_hunyou", "boss_taoni"],
-					names: "孙|策",
-					groupInGuozhan: "qun",
-					isBoss: true,
-					isBossAllowed: true,
-					initFilters: ["noZhuHp", "noZhuSkill"],
-					dieAudios: ["sunce"],
-					extraModeData: "wu",
-				},
+				boss_sunce: [
+					"male",
+					"shen",
+					"1/8",
+					["boss_jiang", "boss_hunzi", "boss_hunyou", "boss_taoni"],
+					["qun", "boss", "bossallowed", "InitFilter:noZhuHp:noZhuSkill"],
+					"wu",
+				],
 
-				boss_nianshou: {
-					sex: "male",
-					group: "shen",
-					hp: Infinity,
-					skills: ["boss_nianrui", "boss_qixiang", "boss_damagecount"],
-					isBoss: true,
-					extraModeData: "shu",
-				},
+				// boss_nianshou:['male','shen',Infinity,['boss_nianrui','boss_qixiang','boss_damagecount'],['boss'],'shu'],
+				// boss_yuji:['male','qun',8,[],['boss','bossallowed'],'nei'],
+				// boss_shuijing:['male','qun',8,[],['boss','bossallowed'],'wei'],
+				// boss_sunshangxiang:['male','qun',8,[],['boss','bossallowed'],'wei'],
 			},
 		},
 		cardPack: {
-			mode_boss: ["honghuangzhili", "sadouchengbing", "yihuajiemu", "chiyanzhenhunqin", "juechenjinge", "xiuluolianyuji", "longfenghemingjian", "qicaishenlu", "hongmianbaihuapao", "boss_mengpohuihun", "lingsheji", "shanrangzhaoshu", "jinwuluorigong", "xingtianpojunfu", "gubuzifeng"],
+			mode_boss: [
+				"honghuangzhili",
+				"sadouchengbing",
+				"yihuajiemu",
+				"chiyanzhenhunqin",
+				"juechenjinge",
+				"xiuluolianyuji",
+				"longfenghemingjian",
+				"qicaishenlu",
+				"hongmianbaihuapao",
+				"boss_mengpohuihun",
+				"lingsheji",
+				"shanrangzhaoshu",
+				"jinwuluorigong",
+				"xingtianpojunfu",
+				"gubuzifeng",
+			],
 		},
-		init() {
+		init: function () {
 			for (var i in lib.characterPack.mode_boss) {
-				if (!lib.characterPack.mode_boss[i].names) lib.characterPack.mode_boss[i].names = "null|null";
-				if (lib.characterPack.mode_boss[i].isHiddenBoss) continue;
+				if (lib.characterPack.mode_boss[i][4].includes("hiddenboss")) continue;
 				lib.mode.boss.config[i + "_boss_config"] = {
 					name: get.translation(i),
 					init: true,
@@ -1800,10 +1643,10 @@ export default () => {
 					var list = [];
 					event.list = list;
 					for (i in lib.character) {
-						if (lib.character[i].isMinskin) continue;
-						if (lib.character[i].isBoss) continue;
-						if (lib.character[i].isHiddenBoss) continue;
-						if (lib.character[i].isAiForbidden) continue;
+						if (lib.character[i][4].includes("minskin")) continue;
+						if (lib.character[i][4].includes("boss")) continue;
+						if (lib.character[i][4].includes("hiddenboss")) continue;
+						if (lib.character[i][4] && lib.character[i][4].includes("forbidai")) continue;
 						if (lib.config.forbidboss.includes(i)) continue;
 						if (lib.filter.characterDisabled(i)) continue;
 						list.push(i);
@@ -1838,7 +1681,11 @@ export default () => {
 
 						var buttons = ui.create.div(".buttons");
 						var node = _status.event.dialog.buttons[0].parentNode;
-						_status.event.dialog.buttons = ui.create.buttons(list.slice(0, 20), "character", buttons);
+						_status.event.dialog.buttons = ui.create.buttons(
+							list.slice(0, 20),
+							"character",
+							buttons
+						);
 						_status.event.dialog.content.insertBefore(buttons, node);
 						buttons.addTempClass("start");
 						node.remove();
@@ -1871,7 +1718,7 @@ export default () => {
 						ui.cheat2 = ui.create.control("自由选将", function () {
 							if (this.dialog == _status.event.dialog) {
 								if (game.changeCoin) {
-									game.changeCoin(10);
+									game.changeCoin(50);
 								}
 								this.dialog.close();
 								_status.event.dialog = this.backup;
@@ -2142,7 +1989,25 @@ export default () => {
 					if (Math.random() > 1 / 3) {
 						return name;
 					} else {
-						var arr = ["shen_caocao", "shen_simayi", "shen_guanyu", "shen_zhugeliang", "shen_zhaoyun", "shen_zhouyu", "shen_lvmeng", "shen_lvbu", "shen_liubei", "shen_luxun", "shen_ganning", "ol_zhangliao", "shen_zhenji", "shen_caopi", "key_kagari", "key_shiki", "db_key_hina"];
+						var arr = [
+							"shen_caocao",
+							"shen_simayi",
+							"shen_guanyu",
+							"shen_zhugeliang",
+							"shen_zhaoyun",
+							"shen_zhouyu",
+							"shen_lvmeng",
+							"shen_lvbu",
+							"shen_liubei",
+							"shen_luxun",
+							"shen_ganning",
+							"ol_zhangliao",
+							"shen_zhenji",
+							"shen_caopi",
+							"key_kagari",
+							"key_shiki",
+							"db_key_hina",
+						];
 						arr.removeArray(list);
 						return arr.randomGet();
 					}
@@ -2188,7 +2053,29 @@ export default () => {
 							game.check();
 						});
 						control.backup1 = ui.create.div(".buttons");
-						control.backup2 = ui.create.buttons(["shen_caocao", "shen_simayi", "shen_guanyu", "shen_zhugeliang", "shen_zhaoyun", "shen_zhouyu", "shen_lvmeng", "shen_lvbu", "shen_liubei", "shen_luxun", "shen_ganning", "ol_zhangliao", "shen_zhenji", "shen_caopi", "key_kagari", "key_shiki", "db_key_hina"], "character", control.backup1);
+						control.backup2 = ui.create.buttons(
+							[
+								"shen_caocao",
+								"shen_simayi",
+								"shen_guanyu",
+								"shen_zhugeliang",
+								"shen_zhaoyun",
+								"shen_zhouyu",
+								"shen_lvmeng",
+								"shen_lvbu",
+								"shen_liubei",
+								"shen_luxun",
+								"shen_ganning",
+								"ol_zhangliao",
+								"shen_zhenji",
+								"shen_caopi",
+								"key_kagari",
+								"key_shiki",
+								"db_key_hina",
+							],
+							"character",
+							control.backup1
+						);
 						return control;
 					}
 				},
@@ -2313,9 +2200,15 @@ export default () => {
 							node.remove();
 						}
 					}
-					var cards = [game.createCard2("gubuzifeng", "club", 5), game.createCard2("gubuzifeng", "diamond", 7)];
+					var cards = [
+						game.createCard2("gubuzifeng", "club", 5),
+						game.createCard2("gubuzifeng", "diamond", 7),
+					];
 					while (cards.length > 0) {
-						ui.cardPile.insertBefore(cards.shift(), ui.cardPile.childNodes[get.rand(0, ui.cardPile.childElementCount - 1)]);
+						ui.cardPile.insertBefore(
+							cards.shift(),
+							ui.cardPile.childNodes[get.rand(0, ui.cardPile.childElementCount - 1)]
+						);
 					}
 					lib.inpile.sort(lib.sort.card);
 				},
@@ -2389,7 +2282,11 @@ export default () => {
 			boss_zhuoguiquxie: {
 				chongzheng: 0,
 				checkResult: function (player) {
-					if (player == game.boss && game.boss.name != "boss_yecha" && game.boss.name != "boss_luocha") {
+					if (
+						player == game.boss &&
+						game.boss.name != "boss_yecha" &&
+						game.boss.name != "boss_luocha"
+					) {
 						return false;
 					}
 				},
@@ -2402,7 +2299,10 @@ export default () => {
 			boss_qinguangwang: {
 				chongzheng: 0,
 				checkResult: function (player) {
-					if (player == game.boss && (!_status.shidianyanluo_level || _status.shidianyanluo_level < 3)) {
+					if (
+						player == game.boss &&
+						(!_status.shidianyanluo_level || _status.shidianyanluo_level < 3)
+					) {
 						return false;
 					}
 				},
@@ -2494,7 +2394,13 @@ export default () => {
 					lib.inpile.remove("tengjia");
 					lib.inpile.remove("fangtian");
 					lib.inpile.remove("muniu");
-					lib.inpile.addArray(["wushuangfangtianji", "shufazijinguan", "hongmianbaihuapao", "linglongshimandai", "lianjunshengyan"]);
+					lib.inpile.addArray([
+						"wushuangfangtianji",
+						"shufazijinguan",
+						"hongmianbaihuapao",
+						"linglongshimandai",
+						"lianjunshengyan",
+					]);
 					lib.inpile.sort(lib.sort.card);
 					var equiplist = [];
 					for (var i = 0; i < ui.cardPile.childElementCount; i++) {
@@ -2565,55 +2471,7 @@ export default () => {
 		},
 		skill: {
 			boss_yingzhong: {
-				getList(type, outside) {
-					let characters = [];
-					if (type === "highHp") {
-						characters = [];
-					}
-					if (outside) {
-						game.filterPlayer2(cur => {
-							characters.removeArray(get.nameList(cur));
-						});
-					}
-					return characters.randomSort();
-				},
-				trigger: {
-					player: "phaseBegin",
-				},
-				filter: function (event, player, name) {
-					return player.phaseNumber === 1;
-				},
-				forced: true,
-				async content(event, trigger, player) {
-					let num = 2,
-						skills = [],
-						characters = lib.skill.boss_yingzhong.getList();
-					const func = name => {
-						const ss = get.character(name, 3);
-						if (ss.length) {
-							skills.addArray(get.character(name, 3));
-							return true;
-						}
-						return false;
-					};
-					for (const name of characters) {
-						if (func(name)) num--;
-						if (!num) break;
-					}
-					if (num && lib.rank) {
-						//备用方案
-						for (const r of ["s", "ap", "a", "am"]) {
-							if (!Array.isArray(lib.rank[r])) continue;
-							const ss = lib.rank[r].randomSort();
-							for (const name of ss) {
-								if (func(name)) num--;
-								if (!num) break;
-							}
-							if (!num) break;
-						}
-					}
-					if (skills.length) await player.addSkills(skills);
-				},
+				//Unfinished
 			},
 			niaobaidaowenha_skill: {
 				trigger: { player: "loseMaxHpAfter" },
@@ -2623,9 +2481,11 @@ export default () => {
 					event.count = trigger.num;
 					"step 1";
 					event.count--;
-					player.chooseTarget(get.prompt2("niaobaidaowenha_skill"), lib.filter.notMe).set("ai", function (target) {
-						return get.attitude(_status.event.player, target) / (target.maxHp || 1);
-					});
+					player
+						.chooseTarget(get.prompt2("niaobaidaowenha_skill"), lib.filter.notMe)
+						.set("ai", function (target) {
+							return get.attitude(_status.event.player, target) / (target.maxHp || 1);
+						});
 					"step 2";
 					if (result.bool) {
 						var target = result.targets[0];
@@ -2729,9 +2589,10 @@ export default () => {
 				direct: true,
 				filter: function (event, player) {
 					let min = 0;
-					if (!player.hasSkill("shanrangzhaoshu", null, false)) min += get.sgn(player.getEquips("shanrangzhaoshu").length);
+					if (!player.hasSkill("shanrangzhaoshu", null, false))
+						min += get.sgn(player.getEquips("shanrangzhaoshu").length);
 					const bool = player.countCards("he") > min;
-					return game.hasPlayer(current => {
+					return game.hasPlayer((current) => {
 						if (current == player || current == _status.currentPhase) return false;
 						if (!bool && current.countCards("h") == 0) return false;
 						const history = current.getHistory("gain")[0];
@@ -2761,9 +2622,11 @@ export default () => {
 					if (target.isIn()) {
 						var list = [];
 						var min = 0;
-						if (!player.hasSkill("shanrangzhaoshu", null, false)) min += get.sgn(player.getEquips("shanrangzhaoshu").length);
+						if (!player.hasSkill("shanrangzhaoshu", null, false))
+							min += get.sgn(player.getEquips("shanrangzhaoshu").length);
 						if (player.countCards("he") > min) list.push(`交给${get.translation(target)}一张牌`);
-						if (target.countCards("he") > 0) list.push(`令${get.translation(target)}交给你一张牌`);
+						if (target.countCards("he") > 0)
+							list.push(`令${get.translation(target)}交给你一张牌`);
 						event.list = list;
 						if (list.length == 0) event.goto(4);
 						else if (list.length == 1) event._result = { index: 0 };
@@ -2773,7 +2636,11 @@ export default () => {
 								.set("choiceList", list)
 								.set("prompt", get.prompt("shanrangzhaoshu", target))
 								.set("ai", function () {
-									if (get.attitude(_status.event.player, _status.event.getParent().target) < 0) return 1;
+									if (
+										get.attitude(_status.event.player, _status.event.getParent().target) <
+										0
+									)
+										return 1;
 									return "cancel2";
 								});
 					} else event.goto(4);
@@ -2796,7 +2663,9 @@ export default () => {
 								if (_status.event.ignoreCard) return true;
 								var cards = player.getEquips("shanrangzhaoshu");
 								if (!cards.includes(card)) return true;
-								return cards.some(cardx => cardx != card && !ui.selected.cards.includes(cardx));
+								return cards.some(
+									(cardx) => cardx != card && !ui.selected.cards.includes(cardx)
+								);
 							})
 							.set("ignoreCard", player.hasSkill("shanrangzhaoshu", null, false));
 					}
@@ -2871,14 +2740,27 @@ export default () => {
 				equipSkill: true,
 				direct: true,
 				filter: function (event, player) {
-					return player.isPhaseUsing() && player != event.target && event.targets.length == 1 && player.countCards("he") > 2;
+					return (
+						player.isPhaseUsing() &&
+						player != event.target &&
+						event.targets.length == 1 &&
+						player.countCards("he") > 2
+					);
 				},
 				content: function () {
 					"step 0";
 					player
-						.chooseToDiscard("he", get.prompt("noda_axe", trigger.target), 2, "弃置两张牌，令" + get.translation(trigger.target) + "本回合内不能使用或打出牌且防具技能无效。", function (card, player) {
-							return card != player.getEquip(1);
-						})
+						.chooseToDiscard(
+							"he",
+							get.prompt("noda_axe", trigger.target),
+							2,
+							"弃置两张牌，令" +
+								get.translation(trigger.target) +
+								"本回合内不能使用或打出牌且防具技能无效。",
+							function (card, player) {
+								return card != player.getEquip(1);
+							}
+						)
 						.set("logSkill", ["noda_axe", trigger.target])
 						.set(
 							"goon",
@@ -2930,7 +2812,13 @@ export default () => {
 				equipSkill: true,
 				trigger: {
 					player: "loseAfter",
-					global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+					global: [
+						"equipAfter",
+						"addJudgeAfter",
+						"gainAfter",
+						"loseAsyncAfter",
+						"addToExpansionAfter",
+					],
 				},
 				direct: true,
 				filter: function (event, player) {
@@ -2942,12 +2830,20 @@ export default () => {
 					var evt = trigger.getl(player);
 					event.num = evt.hs.length;
 					player
-						.chooseTarget(get.prompt("iwasawa_crowbow"), "弃置一名其他角色的" + get.cnNumber(event.num) + "张牌", function (card, player, target) {
-							return player != target && target.countDiscardableCards(player, "he") > 0;
-						})
+						.chooseTarget(
+							get.prompt("iwasawa_crowbow"),
+							"弃置一名其他角色的" + get.cnNumber(event.num) + "张牌",
+							function (card, player, target) {
+								return player != target && target.countDiscardableCards(player, "he") > 0;
+							}
+						)
 						.set("ai", function (target) {
 							var att = get.attitude(_status.event.player, target);
-							if (target.countDiscardableCards(_status.event.player, "he") >= _status.event.getParent().num) att = att * 2;
+							if (
+								target.countDiscardableCards(_status.event.player, "he") >=
+								_status.event.getParent().num
+							)
+								att = att * 2;
 							return -att;
 						});
 					"step 1";
@@ -2959,7 +2855,6 @@ export default () => {
 				},
 			},
 			boss_panguan: {
-				audio: true,
 				mod: {
 					targetEnabled: function (card) {
 						if (get.type(card) == "delay") return false;
@@ -2967,7 +2862,6 @@ export default () => {
 				},
 			},
 			boss_juhun: {
-				audio: true,
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
 				content: function () {
@@ -2982,7 +2876,6 @@ export default () => {
 				},
 			},
 			boss_wangxiang: {
-				audio: true,
 				trigger: { player: "die" },
 				forced: true,
 				forceDie: true,
@@ -3023,10 +2916,17 @@ export default () => {
 					"step 0";
 					game.delay();
 					"step 1";
-					var list = [["boss_chujiangwang", "boss_songdiwang", "boss_wuguanwang", "boss_yanluowang"], ["boss_bianchengwang", "boss_taishanwang", "boss_dushiwang", "boss_pingdengwang"], ["boss_zhuanlunwang"]][_status.shidianyanluo_level];
+					var list = [
+						["boss_chujiangwang", "boss_songdiwang", "boss_wuguanwang", "boss_yanluowang"],
+						["boss_bianchengwang", "boss_taishanwang", "boss_dushiwang", "boss_pingdengwang"],
+						["boss_zhuanlunwang"],
+					][_status.shidianyanluo_level];
 					if (list.length == 1) event._result = { control: list[0] };
 					else
-						player.chooseControl(list).set("prompt", "请选择下一个出战的角色").set("forceDie", true).ai = function () {
+						player
+							.chooseControl(list)
+							.set("prompt", "请选择下一个出战的角色")
+							.set("forceDie", true).ai = function () {
 							return list.randomGet();
 						};
 					"step 2";
@@ -3054,7 +2954,11 @@ export default () => {
 							game.boss.previousSeat.changeSeat(5);
 						}
 						//	game.addBossFellow(game.me==game.boss?1:7,'boss_mengpo');
-						var fellow = game.addFellow(game.me == game.boss ? 1 : 7, "boss_mengpo", "zoominanim");
+						var fellow = game.addFellow(
+							game.me == game.boss ? 1 : 7,
+							"boss_mengpo",
+							"zoominanim"
+						);
 						if (_status.shidianyanluo_level != 0) {
 							fellow.directgain(get.cards(4));
 						}
@@ -3064,7 +2968,17 @@ export default () => {
 						game.addVideo("setIdentity", fellow, "zhong");
 						_status.shidianyanluo_mengpo = true;
 					}
-					var list = ["luxun", "re_luxun", "zhangchunhua", "zuoci", "re_zuoci", "re_yuji", "xin_yuji", "jiangfei", "kongrong"]; //禁将
+					var list = [
+						"luxun",
+						"re_luxun",
+						"zhangchunhua",
+						"zuoci",
+						"re_zuoci",
+						"re_yuji",
+						"xin_yuji",
+						"jiangfei",
+						"kongrong",
+					]; //禁将
 					game.countPlayer(function (current) {
 						if (current != game.boss) {
 							for (var i = 0; i < list.length; i++) {
@@ -3110,30 +3024,19 @@ export default () => {
 						list[x].removeSkill("boss_wangshi2");
 					}
 					"step 1";
-					var list = [["boss_chujiangwang", "boss_songdiwang", "boss_wuguanwang", "boss_yanluowang"], ["boss_bianchengwang", "boss_taishanwang", "boss_dushiwang", "boss_pingdengwang"], ["boss_zhuanlunwang"]][_status.shidianyanluo_level];
+					var list = [
+						["boss_chujiangwang", "boss_songdiwang", "boss_wuguanwang", "boss_yanluowang"],
+						["boss_bianchengwang", "boss_taishanwang", "boss_dushiwang", "boss_pingdengwang"],
+						["boss_zhuanlunwang"],
+					][_status.shidianyanluo_level];
 					//如果mengpo死亡且50回合内通过第三关，list[2]变成地藏王
-					if (game.phaseNumber <= 50 && _status.shidianyanluo_level == 2 && _status.shidianyanluo_mengpodie == true) {
+					if (
+						game.phaseNumber <= 50 &&
+						_status.shidianyanluo_level == 2 &&
+						_status.shidianyanluo_mengpodie == true
+					) {
 						list = ["boss_dizangwang"];
 					}
-					if (
-						_status.shidianyanluo_level == 2 &&
-						game.boss
-							.getEnemies()
-							.map(cur => {
-								const names = get.nameList(cur);
-								for (let name of names) {
-									if (lib.rank.s.includes(name) || lib.rank.ap.includes(name) || lib.rank.a.includes(name) || lib.rank.am.includes(name)) return name;
-								}
-								return false;
-							})
-							.reduce((val, name) => {
-								if (lib.rank.s.includes(name)) return val + 1;
-								if (lib.rank.ap.includes(name)) return val + 0.36;
-								if (lib.rank.a.includes(name)) return val + 0.13;
-								if (lib.rank.am.includes(name)) return val + 0.05;
-							}, 0) > Math.random()
-					)
-						list = ["boss_shikieiki"];
 					if (list.length == 1) event._result = { control: list[0] };
 					else {
 						player
@@ -3163,7 +3066,11 @@ export default () => {
 								game.boss.previousSeat.changeSeat(5);
 							}
 							//game.addBossFellow();
-							var fellow = game.addFellow(game.me == game.boss ? 1 : 7, "boss_mengpo", "zoominanim");
+							var fellow = game.addFellow(
+								game.me == game.boss ? 1 : 7,
+								"boss_mengpo",
+								"zoominanim"
+							);
 							if (_status.shidianyanluo_level != 0) {
 								fellow.directgain(get.cards(4));
 							}
@@ -3189,7 +3096,6 @@ export default () => {
 				},
 			},
 			boss_bingfeng: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3201,10 +3107,7 @@ export default () => {
 					trigger.source.turnOver();
 				},
 			},
-			boss_chujiangwang_weimu: { audio: true },
-			boss_chujiangwang_fankui: { audio: true },
 			boss_heisheng: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3216,7 +3119,6 @@ export default () => {
 				},
 			},
 			boss_shengfu: {
-				audio: true,
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
 				popup: false,
@@ -3235,13 +3137,15 @@ export default () => {
 					}
 				},
 			},
-			boss_songdiwang_enyuan: { audio: true },
 			boss_zhiwang: {
-				audio: true,
 				derivation: "boss_zhiwang_planetarian",
 				trigger: { global: "gainEnd" },
 				filter: function (event, player) {
-					return event.player != player && !(event.getParent().name == "draw" && event.getParent(2).name == "phaseDraw") && event.player.countCards("h");
+					return (
+						event.player != player &&
+						!(event.getParent().name == "draw" && event.getParent(2).name == "phaseDraw") &&
+						event.player.countCards("h")
+					);
 				},
 				forced: true,
 				logTarget: "player",
@@ -3259,7 +3163,6 @@ export default () => {
 				subSkill: { planetarian: {} },
 			},
 			boss_gongzheng: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				filter: function (event, player) {
@@ -3270,7 +3173,6 @@ export default () => {
 				},
 			},
 			boss_xuechi: {
-				audio: true,
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
 				content: function () {
@@ -3295,21 +3197,25 @@ export default () => {
 				equipSkill: false,
 			},
 			boss_zhuxin: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
 				content: function () {
 					"step 0";
 					player
-						.chooseTarget("【诛心】：请选择一名角色，令其受到2点伤害。", function (card, player, target) {
-							return (
-								target != player &&
-								!game.hasPlayer(function (current) {
-									return current != player && current != target && current.hp < target.hp;
-								})
-							);
-						})
+						.chooseTarget(
+							"【诛心】：请选择一名角色，令其受到2点伤害。",
+							function (card, player, target) {
+								return (
+									target != player &&
+									!game.hasPlayer(function (current) {
+										return (
+											current != player && current != target && current.hp < target.hp
+										);
+									})
+								);
+							}
+						)
 						.set("forceDie", true).ai = function (target) {
 						return -get.attitude(_status.event.player, target);
 					};
@@ -3322,7 +3228,6 @@ export default () => {
 				},
 			},
 			boss_leizhou: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				content: function () {
@@ -3336,7 +3241,6 @@ export default () => {
 				},
 			},
 			boss_leifu: {
-				audio: true,
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
 				content: function () {
@@ -3350,7 +3254,6 @@ export default () => {
 				},
 			},
 			boss_leizhu: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3367,7 +3270,6 @@ export default () => {
 				},
 			},
 			boss_fudu: {
-				audio: true,
 				trigger: { global: "useCard" },
 				forced: true,
 				filter: function (event, player) {
@@ -3383,7 +3285,6 @@ export default () => {
 				},
 			},
 			boss_kujiu: {
-				audio: true,
 				trigger: { global: "phaseZhunbeiBegin" },
 				forced: true,
 				filter: function (event, player) {
@@ -3398,7 +3299,6 @@ export default () => {
 				},
 			},
 			boss_renao: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3413,6 +3313,7 @@ export default () => {
 				},
 			},
 			boss_remen: {
+				equipSkill: true,
 				trigger: { target: ["useCardToBefore"] },
 				forced: true,
 				priority: 6,
@@ -3430,18 +3331,17 @@ export default () => {
 					effect: {
 						target: function (card, player, target, current) {
 							if (!target.hasEmptySlot("equip2")) return;
-							if (card.name == "nanman" || card.name == "wanjian") return "zeroplayertarget";
+							if (card.name == "nanman" || card.name == "wanjian") return "zerotarget";
 							if (card.name == "sha") {
 								var equip1 = player.getEquip(1);
 								if (equip1 && equip1.name == "zhuque") return 1.9;
-								if (!game.hasNature(card)) return "zeroplayertarget";
+								if (!game.hasNature(card)) return "zerotarget";
 							}
 						},
 					},
 				},
 			},
 			boss_zhifen: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				content: function () {
@@ -3460,7 +3360,6 @@ export default () => {
 			},
 
 			boss_huoxing: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3477,7 +3376,6 @@ export default () => {
 				},
 			},
 			boss_suozu: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				content: function () {
@@ -3493,7 +3391,6 @@ export default () => {
 				},
 			},
 			boss_abi: {
-				audio: true,
 				trigger: { player: "damageEnd" },
 				forced: true,
 				filter: function (event) {
@@ -3505,7 +3402,6 @@ export default () => {
 				},
 			},
 			boss_pingdeng: {
-				audio: true,
 				trigger: { player: "die" },
 				forceDie: true,
 				forced: true,
@@ -3541,7 +3437,6 @@ export default () => {
 				},
 			},
 			boss_lunhui: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				filter: function (event, player) {
@@ -3570,7 +3465,6 @@ export default () => {
 				},
 			},
 			boss_wangsheng: {
-				audio: true,
 				trigger: { player: "phaseUseBegin" },
 				forced: true,
 				content: function () {
@@ -3585,7 +3479,6 @@ export default () => {
 				},
 			},
 			boss_zlfanshi: {
-				audio: true,
 				trigger: { player: "damageEnd" },
 				forced: true,
 				content: function () {
@@ -3607,7 +3500,14 @@ export default () => {
 				trigger: { global: "loseAfter" },
 				filter: function (event, player) {
 					var evt = event.getParent(3);
-					return event.type == "discard" && evt.name == "phaseDiscard" && evt.player == event.player && evt.player != player && event.cards2 && event.cards2.filterInD("d").length > 0;
+					return (
+						event.type == "discard" &&
+						evt.name == "phaseDiscard" &&
+						evt.player == event.player &&
+						evt.player != player &&
+						event.cards2 &&
+						event.cards2.filterInD("d").length > 0
+					);
 				},
 				content: function () {
 					"step 0";
@@ -3620,7 +3520,8 @@ export default () => {
 						})
 						.set("filterButton", function (button) {
 							for (var i = 0; i < ui.selected.buttons.length; i++) {
-								if (get.suit(ui.selected.buttons[i].link) == get.suit(button.link)) return false;
+								if (get.suit(ui.selected.buttons[i].link) == get.suit(button.link))
+									return false;
 							}
 							return true;
 						});
@@ -3676,7 +3577,10 @@ export default () => {
 				},
 				filter: function (event, player) {
 					for (var i = 0; i < event.cards.length; i++) {
-						if (event.cards[i].name == "boss_mengpohuihun" && get.position(event.cards[i], true) == "d") {
+						if (
+							event.cards[i].name == "boss_mengpohuihun" &&
+							get.position(event.cards[i], true) == "d"
+						) {
 							return true;
 						}
 					}
@@ -3687,7 +3591,10 @@ export default () => {
 				content: function () {
 					var cards = [];
 					for (var i = 0; i < trigger.cards.length; i++) {
-						if (trigger.cards[i].name == "boss_mengpohuihun" && get.position(trigger.cards[i]) == "d") {
+						if (
+							trigger.cards[i].name == "boss_mengpohuihun" &&
+							get.position(trigger.cards[i]) == "d"
+						) {
 							cards.push(trigger.cards[i]);
 						}
 					}
@@ -3716,7 +3623,12 @@ export default () => {
 						if (skills1.length) {
 							for (var i = 0; i < skills1.length; i++) {
 								//排除技能，然后随机失去一个可以失去的技能
-								if (get.skills[i] || lib.skill[skills1[i]].charlotte || !lib.translate[skills1[i] + "_info"] || lib.skill[skills1[i]].zhuSkill == true) {
+								if (
+									get.skills[i] ||
+									lib.skill[skills1[i]].charlotte ||
+									!lib.translate[skills1[i] + "_info"] ||
+									lib.skill[skills1[i]].zhuSkill == true
+								) {
 									skills1.splice(i--, 1);
 								}
 							}
@@ -3735,7 +3647,12 @@ export default () => {
 							if (skills2.length) {
 								for (var i = 0; i < skills2.length; i++) {
 									//排除技能，然后随机失去一个可以失去的技能
-									if (get.skills[i] || lib.skill[skills2[i]].charlotte || !lib.translate[skills2[i] + "_info"] || lib.skill[skills2[i]].zhuSkill == true) {
+									if (
+										get.skills[i] ||
+										lib.skill[skills2[i]].charlotte ||
+										!lib.translate[skills2[i] + "_info"] ||
+										lib.skill[skills2[i]].zhuSkill == true
+									) {
 										skills2.splice(i--, 1);
 									}
 								}
@@ -3915,7 +3832,11 @@ export default () => {
 					return player.countCards("he", { subtype: ["equip3", "equip4", "equip6"] }) > 0;
 				},
 				filterCard: function (card) {
-					return get.subtype(card) == "equip3" || get.subtype(card) == "equip4" || get.subtype(card) == "equip6";
+					return (
+						get.subtype(card) == "equip3" ||
+						get.subtype(card) == "equip4" ||
+						get.subtype(card) == "equip6"
+					);
 				},
 				check: function (card) {
 					if (_status.event.player.isDisabled(get.subtype(card))) return 5;
@@ -4326,7 +4247,6 @@ export default () => {
 				mark: true,
 				intro: { content: "mark" },
 				forced: true,
-				sourceSkill: "boss_duqu",
 				filter: function (event, player) {
 					return player.storage.boss_shedu && player.storage.boss_shedu > 0;
 				},
@@ -4335,9 +4255,10 @@ export default () => {
 					var num = player.storage.boss_shedu;
 					event.num = num;
 					var chs = get.cnNumber(num);
-					player.chooseToDiscard("he", num, "弃置" + chs + "张牌，或失去" + chs + "点体力").ai = function (card) {
-						return 12 - get.value(card);
-					};
+					player.chooseToDiscard("he", num, "弃置" + chs + "张牌，或失去" + chs + "点体力").ai =
+						function (card) {
+							return 12 - get.value(card);
+						};
 					"step 1";
 					if (!result.bool) player.loseHp(num);
 					player.storage.boss_shedu--;
@@ -4364,7 +4285,6 @@ export default () => {
 			boss_echou_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_echou",
 				group: ["boss_echou_switch_on", "boss_echou_switch_off"],
 				subSkill: {
 					off: {
@@ -4435,7 +4355,6 @@ export default () => {
 			boss_xushi_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_xushi",
 				group: ["boss_xushi_switch_on", "boss_xushi_switch_off"],
 				subSkill: {
 					off: {
@@ -4551,7 +4470,6 @@ export default () => {
 			boss_yanyu_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_yanyu",
 				group: ["boss_yanyu_switch_on", "boss_yanyu_switch_off"],
 				subSkill: {
 					off: {
@@ -4628,13 +4546,13 @@ export default () => {
 						target.$giveAuto(card, player);
 					} else event.finish();
 					"step 1";
-					if (player.getCards("h").includes(card) && get.type(card) == "equip") player.chooseUseTarget(card, true, "nopopup", "noanimate");
+					if (player.getCards("h").includes(card) && get.type(card) == "equip")
+						player.chooseUseTarget(card, true, "nopopup", "noanimate");
 				},
 			},
 			boss_sipu_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_sipu",
 				group: ["boss_sipu_switch_on", "boss_sipu_switch_off"],
 				subSkill: {
 					off: {
@@ -4666,25 +4584,53 @@ export default () => {
 				mod: {
 					cardEnabled: function (card, player) {
 						var sc = _status.currentPhase;
-						if (sc && sc != player && sc.isPhaseUsing() && sc.hasSkill("boss_sipu") && !sc.hasSkill("boss_sipu_switch") && sc.countUsed() < 3) {
+						if (
+							sc &&
+							sc != player &&
+							sc.isPhaseUsing() &&
+							sc.hasSkill("boss_sipu") &&
+							!sc.hasSkill("boss_sipu_switch") &&
+							sc.countUsed() < 3
+						) {
 							return false;
 						}
 					},
 					cardUsable: function (card, player) {
 						var sc = _status.currentPhase;
-						if (sc && sc != player && sc.isPhaseUsing() && sc.hasSkill("boss_sipu") && !sc.hasSkill("boss_sipu_switch") && sc.countUsed() < 3) {
+						if (
+							sc &&
+							sc != player &&
+							sc.isPhaseUsing() &&
+							sc.hasSkill("boss_sipu") &&
+							!sc.hasSkill("boss_sipu_switch") &&
+							sc.countUsed() < 3
+						) {
 							return false;
 						}
 					},
 					cardRespondable: function (card, player) {
 						var sc = _status.currentPhase;
-						if (sc && sc != player && sc.isPhaseUsing() && sc.hasSkill("boss_sipu") && !sc.hasSkill("boss_sipu_switch") && sc.countUsed() < 3) {
+						if (
+							sc &&
+							sc != player &&
+							sc.isPhaseUsing() &&
+							sc.hasSkill("boss_sipu") &&
+							!sc.hasSkill("boss_sipu_switch") &&
+							sc.countUsed() < 3
+						) {
 							return false;
 						}
 					},
 					cardSavable: function (card, player) {
 						var sc = _status.currentPhase;
-						if (sc && sc != player && sc.isPhaseUsing() && sc.hasSkill("boss_sipu") && !sc.hasSkill("boss_sipu_switch") && sc.countUsed() < 3) {
+						if (
+							sc &&
+							sc != player &&
+							sc.isPhaseUsing() &&
+							sc.hasSkill("boss_sipu") &&
+							!sc.hasSkill("boss_sipu_switch") &&
+							sc.countUsed() < 3
+						) {
 							return false;
 						}
 					},
@@ -4898,7 +4844,12 @@ export default () => {
 				},
 				mod: {
 					cardEnabled: function (card, player) {
-						if (card.name == "sha" && _status.currentPhase == player && _status.event.getParent("phaseUse") && !player.hasSkill("boss_jiding")) {
+						if (
+							card.name == "sha" &&
+							_status.currentPhase == player &&
+							_status.event.getParent("phaseUse") &&
+							!player.hasSkill("boss_jiding")
+						) {
 							return false;
 						}
 					},
@@ -4913,7 +4864,10 @@ export default () => {
 					targets.add(player.getPrevious());
 					var enemies = player.getEnemies();
 					for (var i = 0; i < targets.length; i++) {
-						if (!enemies.includes(targets[i]) || (!targets[i].getEquip(3) && !targets[i].getEquip(4))) {
+						if (
+							!enemies.includes(targets[i]) ||
+							(!targets[i].getEquip(3) && !targets[i].getEquip(4))
+						) {
 							targets.splice(i--, 1);
 						}
 					}
@@ -4950,7 +4904,13 @@ export default () => {
 					content: "info",
 				},
 				filter: function (event, player) {
-					return event.player != player && event.player.isFriendOf(player) && event.source && event.source.isIn() && event.source.isEnemyOf(player);
+					return (
+						event.player != player &&
+						event.player.isFriendOf(player) &&
+						event.source &&
+						event.source.isIn() &&
+						event.source.isEnemyOf(player)
+					);
 				},
 				logTarget: "source",
 				content: function () {
@@ -5033,7 +4993,6 @@ export default () => {
 			boss_yinzei_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_yinzei",
 				group: ["boss_yinzei_switch_on", "boss_yinzei_switch_off"],
 				subSkill: {
 					off: {
@@ -5061,7 +5020,6 @@ export default () => {
 			boss_jicai_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_jicai",
 				group: ["boss_jicai_switch_on", "boss_jicai_switch_off"],
 				subSkill: {
 					off: {
@@ -5089,7 +5047,6 @@ export default () => {
 			boss_luanchang_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_luanchang",
 				group: ["boss_luanchang_switch_on", "boss_luanchang_switch_off"],
 				subSkill: {
 					off: {
@@ -5117,7 +5074,6 @@ export default () => {
 			boss_yandu_switch: {
 				unique: true,
 				charlotte: true,
-				sourceSkill: "boss_yandu",
 				group: ["boss_yandu_switch_on", "boss_yandu_switch_off"],
 				subSkill: {
 					off: {
@@ -5174,7 +5130,12 @@ export default () => {
 				trigger: { player: "damageBegin3" },
 				forced: true,
 				filter: function (event, player) {
-					return event.source && event.source.isIn() && event.source != player && event.source.getEquip(1);
+					return (
+						event.source &&
+						event.source.isIn() &&
+						event.source != player &&
+						event.source.getEquip(1)
+					);
 				},
 				content: function () {
 					trigger.num++;
@@ -5185,7 +5146,13 @@ export default () => {
 				forced: true,
 				logTarget: "source",
 				filter: function (event, player) {
-					return event.source && event.source.isIn() && event.source != player && event.source.countCards("he") && !player.countCards("h");
+					return (
+						event.source &&
+						event.source.isIn() &&
+						event.source != player &&
+						event.source.countCards("he") &&
+						!player.countCards("h")
+					);
 				},
 				content: function () {
 					trigger.source.randomDiscard();
@@ -5205,7 +5172,11 @@ export default () => {
 			boss_yandu: {
 				trigger: { global: "phaseJieshuBegin" },
 				filter: function (event, player) {
-					return event.player != player && !event.player.getStat("damage") && event.player.countCards("he");
+					return (
+						event.player != player &&
+						!event.player.getStat("damage") &&
+						event.player.countCards("he")
+					);
 				},
 				logTarget: "player",
 				forced: true,
@@ -5244,7 +5215,11 @@ export default () => {
 							card.name == "tao" &&
 							!_status.event.skill &&
 							game.hasPlayer(function (current) {
-								return current != player && current.hasSkill("boss_futai") && _status.currentPhase != current;
+								return (
+									current != player &&
+									current.hasSkill("boss_futai") &&
+									_status.currentPhase != current
+								);
 							})
 						) {
 							return false;
@@ -5255,7 +5230,11 @@ export default () => {
 							card.name == "tao" &&
 							!_status.event.skill &&
 							game.hasPlayer(function (current) {
-								return current != player && current.hasSkill("boss_futai") && _status.currentPhase != current;
+								return (
+									current != player &&
+									current.hasSkill("boss_futai") &&
+									_status.currentPhase != current
+								);
 							})
 						) {
 							return false;
@@ -5335,7 +5314,9 @@ export default () => {
 						trigger: { player: "useCard" },
 						forced: true,
 						filter: function (event, player) {
-							return _status.currentPhase == player && Array.isArray(player.storage.boss_minwan);
+							return (
+								_status.currentPhase == player && Array.isArray(player.storage.boss_minwan)
+							);
 						},
 						content: function () {
 							player.draw();
@@ -5357,7 +5338,11 @@ export default () => {
 				},
 				mod: {
 					playerEnabled: function (card, player, target) {
-						if (_status.currentPhase == player && Array.isArray(player.storage.boss_minwan) && !player.storage.boss_minwan.includes(target)) {
+						if (
+							_status.currentPhase == player &&
+							Array.isArray(player.storage.boss_minwan) &&
+							!player.storage.boss_minwan.includes(target)
+						) {
 							return false;
 						}
 					},
@@ -5410,7 +5395,12 @@ export default () => {
 						trigger: { source: "damageBegin1" },
 						forced: true,
 						filter: function (event, player) {
-							return event.notLink() && event.card && event.card.name == "sha" && event.player.hp < player.hp;
+							return (
+								event.notLink() &&
+								event.card &&
+								event.card.name == "sha" &&
+								event.player.hp < player.hp
+							);
 						},
 						content: function () {
 							trigger.num++;
@@ -5499,16 +5489,14 @@ export default () => {
 				equipSkill: true,
 				inherit: "cixiong_skill",
 				filter: function (event, player) {
-					return get.natureList(event.card).some(i => {
-						return i === "thunder" || i === "fire";
-					});
+					return game.hasNature(event.card, "linked");
 				},
 			},
 			qicaishenlu: {
 				trigger: { source: "damageBegin1" },
 				forced: true,
 				filter: function (event, player) {
-					return event.hasNature("linked");
+					return game.hasNature(event.card, "linked");
 				},
 				content: function () {
 					trigger.num++;
@@ -6290,7 +6278,6 @@ export default () => {
 				},
 				trigger: { player: "phaseDrawBegin" },
 				forced: true,
-				sourceSkill: "boss_shenen",
 				filter: function (event, player) {
 					return !player.side;
 				},
@@ -6323,7 +6310,6 @@ export default () => {
 			boss_fentian2: {
 				trigger: { player: "useCard" },
 				forced: true,
-				sourceSkill: "boss_fentian",
 				filter: function (event, player) {
 					return get.color(event.card) == "red";
 				},
@@ -6343,7 +6329,9 @@ export default () => {
 					) {
 						return false;
 					}
-					return !player.storage.boss_xingxia || game.roundNumber - player.storage.boss_xingxia >= 2;
+					return (
+						!player.storage.boss_xingxia || game.roundNumber - player.storage.boss_xingxia >= 2
+					);
 				},
 				unique: true,
 				filterTarget: function (card, player, target) {
@@ -6366,7 +6354,11 @@ export default () => {
 					if (result.bool) {
 						event.target = result.targets[0];
 						player.line(event.target, "fire");
-						event.target.chooseToDiscard("he", { color: "red" }, "弃置一张红色牌或受到1点火焰伤害").ai = function (card) {
+						event.target.chooseToDiscard(
+							"he",
+							{ color: "red" },
+							"弃置一张红色牌或受到1点火焰伤害"
+						).ai = function (card) {
 							var player = _status.event.player;
 							var source = _status.event.parent.player;
 							if (get.damageEffect(player, source, player, "fire") >= 0) return 0;
@@ -6384,7 +6376,12 @@ export default () => {
 					order: 6,
 					result: {
 						target: function (player, target) {
-							if (target.isLinked() && player.isLinked() && get.damageEffect(player, player, player, "fire") < 0) return -1;
+							if (
+								target.isLinked() &&
+								player.isLinked() &&
+								get.damageEffect(player, player, player, "fire") < 0
+							)
+								return -1;
 							return 1;
 						},
 					},
@@ -6408,7 +6405,10 @@ export default () => {
 								return 0.5;
 							}
 							if (get.tag(card, "damage") || get.tag(card, "recover")) {
-								if (game.boss.isLinked() && get.damageEffect(game.boss, player, game.boss, "fire") < 0) {
+								if (
+									game.boss.isLinked() &&
+									get.damageEffect(game.boss, player, game.boss, "fire") < 0
+								) {
 									if (
 										game.hasPlayer(function (current) {
 											return current.isEnemyOf(game.boss) && current.isLinked();
@@ -6435,9 +6435,12 @@ export default () => {
 				forced: true,
 				globalFixed: true,
 				unique: true,
-				sourceSkill: "boss_huihuo",
 				filter: function (event, player) {
-					return event.player.hasSkill("boss_huihuo") && event.player.isDead() && player.isEnemyOf(event.player);
+					return (
+						event.player.hasSkill("boss_huihuo") &&
+						event.player.isDead() &&
+						player.isEnemyOf(event.player)
+					);
 				},
 				content: function () {
 					trigger.player.line(player, "fire");
@@ -6460,7 +6463,11 @@ export default () => {
 			boss_furan2: {
 				enable: "chooseToUse",
 				filter: function (event, player) {
-					return event.type == "dying" && event.dying.hasSkill("boss_furan") && player.isEnemyOf(event.dying);
+					return (
+						event.type == "dying" &&
+						event.dying.hasSkill("boss_furan") &&
+						player.isEnemyOf(event.dying)
+					);
 				},
 				filterCard: function (card) {
 					return get.color(card) == "red";
@@ -6468,7 +6475,6 @@ export default () => {
 				position: "he",
 				viewAs: { name: "tao" },
 				prompt: "将一张红色牌当桃使用",
-				sourceSkill: "boss_furan",
 				check: function (card) {
 					return 8 - get.value(card);
 				},
@@ -6476,8 +6482,15 @@ export default () => {
 					order: 5,
 					skillTagFilter: function (player) {
 						var event = _status.event;
-						if (event.dying && event.dying.hasSkill("boss_furan") && player.isEnemyOf(event.dying)) {
-							return player.countCards("he", { color: "red" }) > 0 && _status.currentPhase != player;
+						if (
+							event.dying &&
+							event.dying.hasSkill("boss_furan") &&
+							player.isEnemyOf(event.dying)
+						) {
+							return (
+								player.countCards("he", { color: "red" }) > 0 &&
+								_status.currentPhase != player
+							);
 						} else {
 							return false;
 						}
@@ -6532,7 +6545,6 @@ export default () => {
 				trigger: { player: "damageBegin3" },
 				forced: true,
 				popup: false,
-				sourceSkill: "boss_chiyi",
 				content: function () {
 					trigger.num++;
 				},
@@ -6545,9 +6557,15 @@ export default () => {
 					revive: {
 						enable: "phaseUse",
 						filter: function (event, player) {
-							if (!player.storage.boss_buchun || game.roundNumber - player.storage.boss_buchun >= 2) {
+							if (
+								!player.storage.boss_buchun ||
+								game.roundNumber - player.storage.boss_buchun >= 2
+							) {
 								for (var i = 0; i < game.dead.length; i++) {
-									if (game.dead[i].parentNode == player.parentNode && game.dead[i].name == "boss_shujing") {
+									if (
+										game.dead[i].parentNode == player.parentNode &&
+										game.dead[i].name == "boss_shujing"
+									) {
 										return true;
 									}
 								}
@@ -6562,7 +6580,10 @@ export default () => {
 							event.targets = [];
 							var dead = game.dead.slice(0);
 							for (var i = 0; i < dead.length; i++) {
-								if (dead[i].parentNode == player.parentNode && dead[i].name == "boss_shujing") {
+								if (
+									dead[i].parentNode == player.parentNode &&
+									dead[i].name == "boss_shujing"
+								) {
 									event.targets.push(dead[i]);
 								}
 							}
@@ -6613,9 +6634,15 @@ export default () => {
 					recover: {
 						enable: "phaseUse",
 						filter: function (event, player) {
-							if (!player.storage.boss_buchun || game.roundNumber - player.storage.boss_buchun >= 2) {
+							if (
+								!player.storage.boss_buchun ||
+								game.roundNumber - player.storage.boss_buchun >= 2
+							) {
 								for (var i = 0; i < game.dead.length; i++) {
-									if (game.dead[i].parentNode == player.parentNode && game.dead[i].name == "boss_shujing") {
+									if (
+										game.dead[i].parentNode == player.parentNode &&
+										game.dead[i].name == "boss_shujing"
+									) {
 										return false;
 									}
 								}
@@ -6652,7 +6679,11 @@ export default () => {
 				unique: true,
 				filter: function (event, player) {
 					if (event._notrigger.includes(event.player)) return false;
-					return event.player.isIn() && event.player.isEnemyOf(player) && !event.player.hasSkill("boss_zhongdu");
+					return (
+						event.player.isIn() &&
+						event.player.isEnemyOf(player) &&
+						!event.player.hasSkill("boss_zhongdu")
+					);
 				},
 				logTarget: "player",
 				content: function () {
@@ -6672,7 +6703,8 @@ export default () => {
 				nopop: true,
 				temp: true,
 				intro: {
-					content: "锁定技，回合开始时，你进行判定，若结果不为红桃，你受到1点无来源的伤害，若结果不为黑桃，你失去此技能",
+					content:
+						"锁定技，回合开始时，你进行判定，若结果不为红桃，你受到1点无来源的伤害，若结果不为黑桃，你失去此技能",
 				},
 				content: function () {
 					"step 0";
@@ -6779,7 +6811,12 @@ export default () => {
 					if (event.card && event.card.name == "wuxie") return false;
 					var type = get.type(event.card);
 					if (type != "trick") return false;
-					var card = game.createCard(event.card.name, event.card.suit, event.card.number, event.card.nature);
+					var card = game.createCard(
+						event.card.name,
+						event.card.suit,
+						event.card.number,
+						event.card.nature
+					);
 					var targets = event._targets || event.targets;
 					for (var i = 0; i < targets.length; i++) {
 						if (!targets[i].isIn()) return false;
@@ -6794,7 +6831,12 @@ export default () => {
 					return true;
 				},
 				content: function () {
-					var card = game.createCard(trigger.card.name, trigger.card.suit, trigger.card.number, trigger.card.nature);
+					var card = game.createCard(
+						trigger.card.name,
+						trigger.card.suit,
+						trigger.card.number,
+						trigger.card.nature
+					);
 					player.useCard(card, (trigger._targets || trigger.targets).slice(0));
 				},
 				ai: {
@@ -6818,7 +6860,12 @@ export default () => {
 			boss_yuance: {
 				trigger: { global: "damageEnd" },
 				filter: function (event) {
-					return event.source && event.source != event.player && event.source.isAlive() && event.player.isAlive();
+					return (
+						event.source &&
+						event.source != event.player &&
+						event.source.isAlive() &&
+						event.player.isAlive()
+					);
 				},
 				direct: true,
 				content: function () {
@@ -6863,7 +6910,18 @@ export default () => {
 							}
 						})
 						.set("prompt", get.prompt("boss_yuance"))
-						.set("choiceList", ["若判定结果为黑色，" + playername + "失去1点体力，否则" + sourcename + "失去1点体力", "若判定结果为红色，" + playername + "回复1点体力，否则" + sourcename + "回复1点体力"]);
+						.set("choiceList", [
+							"若判定结果为黑色，" +
+								playername +
+								"失去1点体力，否则" +
+								sourcename +
+								"失去1点体力",
+							"若判定结果为红色，" +
+								playername +
+								"回复1点体力，否则" +
+								sourcename +
+								"回复1点体力",
+						]);
 					"step 1";
 					var att1 = get.attitude(player, trigger.player);
 					var att2 = get.attitude(player, trigger.source);
@@ -6969,8 +7027,8 @@ export default () => {
 					}
 					for (var i in lib.character) {
 						if (lib.character[i][1] != "wei") continue;
-						if (lib.character[i].isBoss) continue;
-						if (lib.character[i].isMinskin) continue;
+						if (lib.character[i][4].includes("boss")) continue;
+						if (lib.character[i][4].includes("minskin")) continue;
 						if (player.storage.xiongcai.includes(i)) continue;
 						if (list2.includes(i)) continue;
 						list.push(i);
@@ -6982,7 +7040,10 @@ export default () => {
 					for (var i = 0; i < skills.length; i++) {
 						player.addSkill(skills[i]);
 					}
-					event.dialog = ui.create.dialog('<div class="text center">' + get.translation(player) + "发动了【雄才】", [[name], "character"]);
+					event.dialog = ui.create.dialog(
+						'<div class="text center">' + get.translation(player) + "发动了【雄才】",
+						[[name], "character"]
+					);
 					game.delay(2);
 					"step 2";
 					event.dialog.close();
@@ -7019,7 +7080,11 @@ export default () => {
 				global: "boss_zhangwu_ai",
 				trigger: { player: "damageEnd" },
 				check: function (event, player) {
-					return event.source && event.source.isIn() && get.damageEffect(event.source, player, player) > 0;
+					return (
+						event.source &&
+						event.source.isIn() &&
+						get.damageEffect(event.source, player, player) > 0
+					);
 				},
 				filter: function (event) {
 					return event.source && event.source.isAlive();
@@ -7040,10 +7105,16 @@ export default () => {
 						var num = result.cards.length;
 						var cnum = get.cnNumber(num);
 						event.num = num;
-						trigger.source.chooseToDiscard("he", "章武：弃置" + cnum + "张牌，或取消并受到" + cnum + "点伤害", num).set("ai", function (card) {
-							if (!trigger.source.hasSkillTag("nodamage")) return 10 - get.value(card);
-							return 0;
-						});
+						trigger.source
+							.chooseToDiscard(
+								"he",
+								"章武：弃置" + cnum + "张牌，或取消并受到" + cnum + "点伤害",
+								num
+							)
+							.set("ai", function (card) {
+								if (!trigger.source.hasSkillTag("nodamage")) return 10 - get.value(card);
+								return 0;
+							});
 					} else {
 						event.finish();
 					}
@@ -7057,7 +7128,11 @@ export default () => {
 					maixie_hp: true,
 					effect: {
 						target: function (card, player, target) {
-							if (get.tag(card, "damage") && get.attitude(target, player) < 0 && player.countCards("he") < target.countCards("he")) {
+							if (
+								get.tag(card, "damage") &&
+								get.attitude(target, player) < 0 &&
+								player.countCards("he") < target.countCards("he")
+							) {
 								return [0, 2];
 							}
 						},
@@ -7067,10 +7142,13 @@ export default () => {
 			boss_zhangwu_ai: {
 				ai: {
 					effect: {
-						target_use: function (card, player, target) {
+						target: function (card, player, target) {
 							if (get.tag(card, "recover") && card.name != "recover") {
 								for (var i = 0; i < game.players.length; i++) {
-									if (game.players[i].hasSkill("xiaoxiong") && get.attitude(target, game.players[i]) < 0) {
+									if (
+										game.players[i].hasSkill("xiaoxiong") &&
+										get.attitude(target, game.players[i]) < 0
+									) {
 										return "zeroplayertarget";
 									}
 								}
@@ -7085,7 +7163,9 @@ export default () => {
 				intro: {
 					content: function (storage, player) {
 						var str = "扣减" + (7 - player.storage.xiangxing_count) + "点体力后失去下一枚星；";
-						str += "防止禳星伤害条件：" + lib.translate["xiangxing" + player.storage.xiangxing + "_info"];
+						str +=
+							"防上禳星伤害条件：" +
+							lib.translate["xiangxing" + player.storage.xiangxing + "_info"];
 						return str;
 					},
 					markcount: function (storage, player) {
@@ -7097,10 +7177,10 @@ export default () => {
 						return player.countCards("h") == 0;
 					},
 					x6: function (player, event) {
-						if (event.hasNature) return event.hasNature("fire");
+						return event.hasNature("fire");
 					},
 					x5: function (player, event) {
-						if (event.hasNature) return event.hasNature("thunder");
+						return event.hasNature("thunder");
 					},
 					x4: function (player, event) {
 						return event.name == "loseHp";
@@ -7115,57 +7195,6 @@ export default () => {
 					},
 					x1: function () {
 						return game.players.length == 2;
-					},
-				},
-				ai: {
-					combo: "xiangxing",
-					neg: true,
-					effect: {
-						target(card, player, target) {
-							if (!target.hasSkill("xiangxing") || !target.storage.xiangxing || target.storage.xiangxing_count < 6) return;
-							switch (target.storage.xiangxing) {
-								case 7:
-									if (get.tag(card, "discard") || get.tag(card, "lose")) {
-										if (player !== target) return [1, 0, 1, 6 / (1 + target.countCards("h"))];
-									}
-									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
-										if (target.countCards("h")) return [1, 7, 1, -7];
-									}
-									break;
-								case 6:
-									if (typeof card === "object" && game.hasNature(card, "fire")) return;
-									if (get.tag(card, "damage") || get.tag(card, "losehp")) return [1, 6, 1, -6];
-									break;
-								case 5:
-									if (typeof card !== "object" || game.hasNature(card, "thunder")) return;
-									if (get.tag(card, "damage") || get.tag(card, "losehp")) return [1, 5, 1, -5];
-									break;
-								case 4:
-									if (get.tag(card, "damage")) return [1, 2, 1, -2];
-									if (get.tag(card, "losehp")) return [1, -4];
-									break;
-								case 3:
-									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
-										if (
-											!game.hasPlayer(current => {
-												return current !== target && current.countCards("e") >= 4;
-											})
-										)
-											return [1, 3, 1, -3];
-									}
-									break;
-								case 2:
-									if (typeof card === "object" && get.type(card) === "delay") {
-										if (target.countCards("j")) return [1, -4];
-									}
-									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
-										if (target.countCards("j") <= 2) return [1, 2, 1, -3];
-									}
-									break;
-								case 1:
-									if (game.players.length !== 2) return [1, 2, 1, -3];
-							}
-						},
 					},
 				},
 			},
@@ -7190,7 +7219,10 @@ export default () => {
 						player.storage.xiangxing_count += num;
 					}
 					if (player.storage.xiangxing_count >= 7) {
-						if (player.hasSkill("yueyin") && lib.skill.yueyin.skipDamage["x" + player.storage.xiangxing](player, trigger)) {
+						if (
+							player.hasSkill("yueyin") &&
+							lib.skill.yueyin.skipDamage["x" + player.storage.xiangxing](player, trigger)
+						) {
 							event.goto(3);
 						}
 						player.removeSkill("xiangxing" + player.storage.xiangxing);
@@ -7299,7 +7331,14 @@ export default () => {
 					}
 				},
 				ai: {
-					threaten: 3,
+					threaten: 1.5,
+				},
+			},
+			fengqi2: {
+				mod: {
+					wuxieRespondable: function () {
+						return false;
+					},
 				},
 			},
 			gaiming: {
@@ -7310,7 +7349,11 @@ export default () => {
 				content: function () {
 					"step 0";
 					event.cards = get.cards(7);
-					player.chooseCardButton(true, event.cards, "改命：选择一张牌作为你的" + trigger.judgestr + "判定结果").ai = function (button) {
+					player.chooseCardButton(
+						true,
+						event.cards,
+						"改命：选择一张牌作为你的" + trigger.judgestr + "判定结果"
+					).ai = function (button) {
 						if (get.attitude(player, trigger.player) > 0) {
 							return 1 + trigger.judge(button.link);
 						}
@@ -7379,15 +7422,6 @@ export default () => {
 					trigger.result.node.delete();
 					game.delay();
 				},
-				ai: {
-					effect: {
-						target(card, player, target) {
-							if (typeof card !== "object" || get.type(card) !== "delay") return;
-							if (target.storage.xiangxing === 2 && target.storage.xiangxing_count > 4 && target.hasSkill("xiangxing") && target.hasSkill("yueyin")) return;
-							return 0.13;
-						},
-					},
-				},
 			},
 			tiandao: {
 				audio: true,
@@ -7398,7 +7432,16 @@ export default () => {
 				},
 				content: function () {
 					"step 0";
-					player.chooseCard(get.translation(trigger.player) + "的" + (trigger.judgestr || "") + "判定为" + get.translation(trigger.player.judging[0]) + "，" + get.prompt("tiandao"), "he").ai = function (card) {
+					player.chooseCard(
+						get.translation(trigger.player) +
+							"的" +
+							(trigger.judgestr || "") +
+							"判定为" +
+							get.translation(trigger.player.judging[0]) +
+							"，" +
+							get.prompt("tiandao"),
+						"he"
+					).ai = function (card) {
 						var trigger = _status.event.parent._trigger;
 						var player = _status.event.player;
 						var result = trigger.judge(card) - trigger.judge(trigger.player.judging[0]);
@@ -7514,12 +7557,7 @@ export default () => {
 			mazui2: {
 				trigger: { source: "damageBegin1" },
 				forced: true,
-				mark: true,
-				sourceSkill: "mazui",
-				intro: {
-					content: "expansion",
-					markcount: "expansion",
-				},
+				mark: "card",
 				filter: function (event) {
 					return event.num > 0;
 				},
@@ -7536,7 +7574,6 @@ export default () => {
 				trigger: { source: ["damageEnd", "damageZero"] },
 				forced: true,
 				popup: false,
-				sourceSkill: "mazui",
 				content: function () {
 					player.gain(player.storage.mazui2, "gain2");
 					game.log(player, "获得了", player.storage.mazui2);
@@ -7559,7 +7596,7 @@ export default () => {
 				},
 				ai: {
 					effect: {
-						target_use: function (card, player, target) {
+						target: function (card, player, target) {
 							if (get.tag(card, "respondShan")) {
 								var shans = target.countCards("h", "shan");
 								var hs = target.countCards("h");
@@ -7609,7 +7646,7 @@ export default () => {
 				ai: {
 					mingzhi: false,
 					effect: {
-						target_use: function (card, player, target) {
+						target: function (card, player, target) {
 							if (get.tag(card, "respondShan")) {
 								var shans = target.countCards("h", "shan");
 								var hs = target.countCards("h");
@@ -7659,29 +7696,37 @@ export default () => {
 				trigger: { global: "phaseZhunbeiBegin" },
 				forced: true,
 				filter: function (event, player) {
-					return event.player != player && (event.player.countCards("h") > 1 || event.player.countCards("e") > 1);
+					return (
+						event.player != player &&
+						(event.player.countCards("h") > 1 || event.player.countCards("e") > 1)
+					);
 				},
 				content: function () {
 					"step 0";
 					player.line(trigger.player, "green");
-					var next = trigger.player.chooseCard(true, "选择保留一张手牌和一张装备区内的牌，然后弃置其它牌", "he", function (card) {
-						switch (get.position(card)) {
-							case "h": {
-								if (ui.selected.cards.length) {
-									return get.position(ui.selected.cards[0]) == "e";
-								} else {
-									return trigger.player.countCards("h") > 1;
+					var next = trigger.player.chooseCard(
+						true,
+						"选择保留一张手牌和一张装备区内的牌，然后弃置其它牌",
+						"he",
+						function (card) {
+							switch (get.position(card)) {
+								case "h": {
+									if (ui.selected.cards.length) {
+										return get.position(ui.selected.cards[0]) == "e";
+									} else {
+										return trigger.player.countCards("h") > 1;
+									}
 								}
-							}
-							case "e": {
-								if (ui.selected.cards.length) {
-									return get.position(ui.selected.cards[0]) == "h";
-								} else {
-									return trigger.player.countCards("e") > 1;
+								case "e": {
+									if (ui.selected.cards.length) {
+										return get.position(ui.selected.cards[0]) == "h";
+									} else {
+										return trigger.player.countCards("e") > 1;
+									}
 								}
 							}
 						}
-					});
+					);
 					var num = 0;
 					if (trigger.player.countCards("h") > 1) {
 						num++;
@@ -7749,7 +7794,13 @@ export default () => {
 				},
 			},
 			boss_mengtai: {
-				group: ["boss_mengtai_begin", "boss_mengtai_draw", "boss_mengtai_use", "boss_mengtai_discard", "boss_mengtai_end"],
+				group: [
+					"boss_mengtai_begin",
+					"boss_mengtai_draw",
+					"boss_mengtai_use",
+					"boss_mengtai_discard",
+					"boss_mengtai_end",
+				],
 				subSkill: {
 					begin: {
 						trigger: { player: "phaseZhunbeiBegin" },
@@ -7820,7 +7871,9 @@ export default () => {
 						if (!player.storage.boss_nbianshen.length) {
 							player.storage.boss_nbianshen = ["jingjue", "renxing", "ruizhi", "baonu"];
 						}
-						player.storage.boss_nbianshen_next = player.storage.boss_nbianshen.randomGet(player.storage.boss_nbianshen_next);
+						player.storage.boss_nbianshen_next = player.storage.boss_nbianshen.randomGet(
+							player.storage.boss_nbianshen_next
+						);
 						player.hp = hp;
 						player.maxHp = maxHp;
 						player.hujia = hujia;
@@ -7874,7 +7927,7 @@ export default () => {
 				ai: {
 					effect: {
 						target: function (card, player, target, current) {
-							if (card.name == "lebu" || card.name == "bingliang") return 0.8;
+							if (card.name == "lebu" && card.name == "bingliang") return 0.8;
 						},
 					},
 				},
@@ -8023,9 +8076,13 @@ export default () => {
 					});
 					"step 1";
 					if (result.bool) {
-						player.chooseTarget(true, "选择一个目标对其造成两点火焰伤害", function (card, player, target) {
-							return player != target;
-						}).ai = function (target) {
+						player.chooseTarget(
+							true,
+							"选择一个目标对其造成两点火焰伤害",
+							function (card, player, target) {
+								return player != target;
+							}
+						).ai = function (target) {
 							return get.damageEffect(target, player, player, "fire");
 						};
 					} else {
@@ -8075,7 +8132,6 @@ export default () => {
 				},
 			},
 			boss_modao: {
-				audio: true,
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				content: function () {
@@ -8146,9 +8202,13 @@ export default () => {
 					var num = game.countPlayer(function (current) {
 						return current != player && !current.isLinked();
 					});
-					player.chooseTarget(get.prompt("boss_suoming"), [1, num], function (card, player, target) {
-						return !target.isLinked() && player != target;
-					}).ai = function (target) {
+					player.chooseTarget(
+						get.prompt("boss_suoming"),
+						[1, num],
+						function (card, player, target) {
+							return !target.isLinked() && player != target;
+						}
+					).ai = function (target) {
 						return -get.attitude(player, target);
 					};
 					"step 1";
@@ -8205,7 +8265,6 @@ export default () => {
 				trigger: { target: ["useCardToBefore", "shaBegin"] },
 				forced: true,
 				priority: 6,
-				sourceSkill: "boss_manjia",
 				filter: function (event, player, name) {
 					if (player.getEquip(2)) return false;
 					if (name == "shaBegin") return lib.skill.tengjia3.filter(event, player);
@@ -8225,7 +8284,6 @@ export default () => {
 			},
 			boss_manjia2: {
 				trigger: { player: "damageBegin3" },
-				sourceSkill: "boss_manjia",
 				filter: function (event, player) {
 					if (player.getEquip(2)) return false;
 					if (event.hasNature("fire")) return true;
@@ -8290,7 +8348,6 @@ export default () => {
 				trigger: { global: "dieAfter" },
 				forced: true,
 				globalFixed: true,
-				sourceSkill: "boss_minbao",
 				filter: function (event, player) {
 					return event.player.hasSkill("boss_minbao") && event.player.isDead();
 				},
@@ -8373,9 +8430,12 @@ export default () => {
 				trigger: { global: "dieAfter" },
 				forced: true,
 				globalFixed: true,
-				sourceSkill: "boss_shanbeng",
 				filter: function (event, player) {
-					return player.countCards("e") > 0 && event.player.hasSkill("boss_shanbeng") && event.player.isDead();
+					return (
+						player.countCards("e") > 0 &&
+						event.player.hasSkill("boss_shanbeng") &&
+						event.player.isDead()
+					);
 				},
 				content: function () {
 					player.discard(player.getCards("e"));
@@ -8484,7 +8544,7 @@ export default () => {
 				},
 				ai: {
 					effect: {
-						target_use: function (card, player, target, current) {
+						target: function (card, player, target, current) {
 							if (get.tag(card, "respondShan")) {
 								var hastarget = false,
 									players = game.filterPlayer();
@@ -8618,7 +8678,6 @@ export default () => {
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				popup: false,
-				sourceSkill: "boss_konghun",
 				content: function () {
 					var players = game.players.concat(game.dead);
 					for (var i = 0; i < players.length; i++) {
@@ -8711,7 +8770,7 @@ export default () => {
 					threaten: 0.8,
 					effect: {
 						target: function (card) {
-							if (card.name == "bingliang") return [0, 0];
+							if (card.name == "bingliang") return 0;
 						},
 					},
 				},
@@ -8721,7 +8780,6 @@ export default () => {
 				priority: 10,
 				forced: true,
 				popup: false,
-				sourceSkill: "huanhua",
 				check: function () {
 					return false;
 				},
@@ -8732,7 +8790,6 @@ export default () => {
 			huanhua3: {
 				trigger: { global: "drawAfter" },
 				forced: true,
-				sourceSkill: "huanhua",
 				filter: function (event, player) {
 					if (event.parent.name != "phaseDraw") return false;
 					return event.player != player;
@@ -8744,7 +8801,6 @@ export default () => {
 			huanhua4: {
 				trigger: { global: "discardAfter" },
 				forced: true,
-				sourceSkill: "huanhua",
 				filter: function (event, player) {
 					if (event.parent.parent.name != "phaseDiscard") return false;
 					return event.player != player;
@@ -8896,7 +8952,7 @@ export default () => {
 					effect: {
 						target: function (card) {
 							if (get.tag(card, "fireDamage")) {
-								return [0, 2, 0, 0];
+								return [0, 2];
 							}
 						},
 					},
@@ -8916,9 +8972,13 @@ export default () => {
 					});
 					"step 1";
 					if (result.bool) {
-						player.chooseTarget(true, "选择一个目标令其失去1点体力", function (card, player, target) {
-							return player != target;
-						}).ai = function (target) {
+						player.chooseTarget(
+							true,
+							"选择一个目标令其失去1点体力",
+							function (card, player, target) {
+								return player != target;
+							}
+						).ai = function (target) {
 							return Math.max(1, 9 - target.hp);
 						};
 					} else {
@@ -9094,7 +9154,6 @@ export default () => {
 			fanghua: {
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
-				locked: false,
 				unique: true,
 				filter: function () {
 					return game.hasPlayer(function (current) {
@@ -9152,7 +9211,7 @@ export default () => {
 				},
 				ai: {
 					effect: {
-						player_use: function (card) {
+						player: function (card) {
 							if (get.color(card) == "black") {
 								return [1, 2];
 							}
@@ -9195,7 +9254,12 @@ export default () => {
 				},
 				content: function () {
 					"step 0";
-					var next = player.discardPlayerCard(player, 2, "hj", "是否一张手牌来弃置一张花色相同的判定牌？");
+					var next = player.discardPlayerCard(
+						player,
+						2,
+						"hj",
+						"是否一张手牌来弃置一张花色相同的判定牌？"
+					);
 					next.filterButton = function (button) {
 						var card = button.link;
 						if (!lib.filter.cardDiscardable(card, player)) return false;
@@ -9227,7 +9291,6 @@ export default () => {
 				trigger: { player: "phaseJieshuBegin" },
 				forced: true,
 				unique: true,
-				sourceSkill: "shangshix",
 				filter: function (event, player) {
 					return player.hp > 1;
 				},
@@ -9425,7 +9488,6 @@ export default () => {
 			shenqu2: {
 				trigger: { player: "damageAfter" },
 				direct: true,
-				sourceSkill: "shenqu",
 				filter: function (event, player) {
 					return player.hasSkillTag("respondTao") || player.countCards("h", "tao") > 0;
 				},
@@ -9448,7 +9510,8 @@ export default () => {
 				filterCard: true,
 				position: "he",
 				check: function (card) {
-					if (get.position(card) == "e" && _status.event.player.hasSkill("olxuanfeng")) return 16 - get.value(card);
+					if (get.position(card) == "e" && _status.event.player.hasSkill("olxuanfeng"))
+						return 16 - get.value(card);
 					return 7 - get.value(card);
 				},
 				content: function () {
@@ -9464,9 +9527,15 @@ export default () => {
 					} else {
 						player
 							.chooseControl(list, function () {
-								if (list.includes("olxuanfeng") && player.countCards("he", { type: "equip" })) return "olxuanfeng";
+								if (list.includes("olxuanfeng") && player.countCards("he", { type: "equip" }))
+									return "olxuanfeng";
 								if (!player.getStat().skill.qiangxix) {
-									if (player.hasSkill("qiangxix") && player.getEquip(1) && list.includes("olxuanfeng")) return "olxuanfeng";
+									if (
+										player.hasSkill("qiangxix") &&
+										player.getEquip(1) &&
+										list.includes("olxuanfeng")
+									)
+										return "olxuanfeng";
 									if (list.includes("rewansha") || list.includes("qiangxix")) {
 										var players = game.filterPlayer();
 										for (var i = 0; i < players.length; i++) {
@@ -9493,7 +9562,12 @@ export default () => {
 						var player = _status.event.player;
 						if (player.countCards("e", { type: "equip" })) return 10;
 						if (!player.getStat().skill.qiangxix) {
-							if (player.hasSkill("qiangxix") && player.getEquip(1) && !player.hasSkill("olxuanfeng")) return 10;
+							if (
+								player.hasSkill("qiangxix") &&
+								player.getEquip(1) &&
+								!player.hasSkill("olxuanfeng")
+							)
+								return 10;
 							if (player.hasSkill("rewansha")) return 1;
 							var players = game.filterPlayer();
 							for (var i = 0; i < players.length; i++) {
@@ -9506,11 +9580,17 @@ export default () => {
 						player: function (player) {
 							if (player.countCards("e", { type: "equip" })) return 1;
 							if (!player.getStat().skill.qiangxix) {
-								if (player.hasSkill("qiangxix") && player.getEquip(1) && !player.hasSkill("olxuanfeng")) return 1;
+								if (
+									player.hasSkill("qiangxix") &&
+									player.getEquip(1) &&
+									!player.hasSkill("olxuanfeng")
+								)
+									return 1;
 								if (!player.hasSkill("rewansha") || !player.hasSkill("qiangxix")) {
 									var players = game.filterPlayer();
 									for (var i = 0; i < players.length; i++) {
-										if (players[i].hp == 1 && get.attitude(player, players[i]) < 0) return 1;
+										if (players[i].hp == 1 && get.attitude(player, players[i]) < 0)
+											return 1;
 									}
 								}
 							}
@@ -9554,13 +9634,18 @@ export default () => {
 					effect: {
 						target: function (card, player, target) {
 							if (!target.hasFriend()) return;
-							if (get.tag(card, "damage") == 1 && target.hp == 2 && !target.isTurnedOver() && _status.currentPhase != target && get.distance(_status.currentPhase, target, "absolute") <= 3) return [0.5, 1];
+							if (
+								get.tag(card, "damage") == 1 &&
+								target.hp == 2 &&
+								!target.isTurnedOver() &&
+								_status.currentPhase != target &&
+								get.distance(_status.currentPhase, target, "absolute") <= 3
+							)
+								return [0.5, 1];
 						},
 					},
 				},
 			},
-			reyingzi_sunce: { audio: 2 },
-			yinghun_sunce: { audio: 2 },
 			boss_jiang: {
 				audio: "jiang",
 				trigger: {
@@ -9584,7 +9669,8 @@ export default () => {
 					if (get.itemtype(event.cards) != "cards") return false;
 					if (["h", "e", "j"].includes(get.position(event.cards[0]))) return false;
 					if (event.respondTo[1] && get.itemtype(event.respondTo[1]) != "card") return false;
-					if (event.respondTo[1] && ["h", "e", "j"].includes(get.position(event.respondTo[1]))) return false;
+					if (event.respondTo[1] && ["h", "e", "j"].includes(get.position(event.respondTo[1])))
+						return false;
 				},
 				filter: function (event, player) {
 					if (!player.storage.boss_jiang) return false;
@@ -9601,7 +9687,8 @@ export default () => {
 					player.draw();
 					if (!lib.skill.boss_jiang.filter2(trigger, player)) return;
 					if (trigger.respondTo[0] != player) {
-						if (trigger.respondTo[1] && get.position(trigger.respondTo[1]) == "d") player.gain(trigger.respondTo[1], "gain2");
+						if (trigger.respondTo[1] && get.position(trigger.respondTo[1]) == "d")
+							player.gain(trigger.respondTo[1], "gain2");
 					} else {
 						if (get.position(trigger.cards[0]) == "d") player.gain(trigger.cards, "gain2");
 					}
@@ -9609,7 +9696,6 @@ export default () => {
 				group: ["boss_jiang_use"],
 				subSkill: {
 					use: {
-						audio: "jiang",
 						trigger: {
 							global: ["useCard"],
 						},
@@ -9621,7 +9707,12 @@ export default () => {
 						frequent: true,
 						content: function () {
 							player.draw();
-							if (trigger.player != player && get.itemtype(trigger.cards) == "cards" && get.position(trigger.cards[0]) == "d") player.gain(trigger.cards, "gain2");
+							if (
+								trigger.player != player &&
+								get.itemtype(trigger.cards) == "cards" &&
+								get.position(trigger.cards[0]) == "d"
+							)
+								player.gain(trigger.cards, "gain2");
 						},
 						sub: true,
 					},
@@ -9636,7 +9727,13 @@ export default () => {
 					player.update();
 				},
 				trigger: {
-					player: ["damageBefore", "recoverBefore", "loseHpBefore", "loseMaxHpBefore", "gainMaxHpBefore"],
+					player: [
+						"damageBefore",
+						"recoverBefore",
+						"loseHpBefore",
+						"loseMaxHpBefore",
+						"gainMaxHpBefore",
+					],
 				},
 				content: function () {
 					trigger.cancel();
@@ -9711,13 +9808,19 @@ export default () => {
 							var node = game[keysArray[1]][i];
 							for (var a in Object.keys(lib[keysArray[3]][keysArray[2]].prototype)) {
 								var opd = Object.getOwnPropertyDescriptor(node, a);
-								if (isDefined(opd)) _status.taoni_over(lib.translate[node.name] + "触发了〖讨逆〗，游戏已被终止。");
+								if (isDefined(opd))
+									_status.taoni_over(
+										lib.translate[node.name] + "触发了〖讨逆〗，游戏已被终止。"
+									);
 								//还原函数
 								node[a] = lib[keysArray[3]][keysArray[2]].prototype[a];
 								var playerKeysArray = ["classList", "hp", "maxHp", "skills"];
 								for (var b = 0; b < playerKeysArray.length; b++) {
 									var opd2 = Object.getOwnPropertyDescriptor(node, playerKeysArray[b]);
-									if (isDefined(opd2)) _status.taoni_over(lib.translate[node.name] + "触发了〖讨逆〗，游戏已被终止。");
+									if (isDefined(opd2))
+										_status.taoni_over(
+											lib.translate[node.name] + "触发了〖讨逆〗，游戏已被终止。"
+										);
 								}
 								var gameKeysArray = ["players", "dead", "over"];
 								for (var c = 0; c < gameKeysArray.length; c++) {
@@ -9757,8 +9860,10 @@ export default () => {
 			boss_nianshou_baonu: "暴怒年兽",
 			boss_nianshou_ruizhi: "睿智年兽",
 
+			boss_shuijing: "水镜先生",
 			boss_huangyueying: "奇智女杰",
 			boss_zhangchunhua: "冷血皇后",
+			boss_satan: "堕落天使",
 			boss_dongzhuo: "乱世魔王",
 			boss_lvbu1: "最强神话",
 			boss_lvbu2: "暴怒战神",
@@ -9768,9 +9873,11 @@ export default () => {
 			boss_zhugeliang: "祭风卧龙",
 			boss_zhangjiao: "天公将军",
 			boss_zuoci: "迷之仙人",
+			boss_yuji: "琅琊道士",
 			boss_liubei: "蜀汉烈帝",
 			boss_caiwenji: "异乡孤女",
 			boss_huatuo: "药坛圣手",
+			boss_luxun: "蹁跹君子",
 			boss_zhenji: "洛水仙子",
 			boss_diaochan: "绝代妖姬",
 			boss_guojia: "世之奇士",
@@ -9795,67 +9902,87 @@ export default () => {
 			boss_yaoshou: "妖兽",
 			boss_yaoshou_info: "锁定技，你与其他角色计算-2。",
 			boss_duqu: "毒躯",
-			boss_duqu_info: "锁定技，你受到伤害时，伤害来源获得1枚“蛇毒”标记；你自身不会拥有“蛇毒”标记；你的【桃】均视为【杀】。“蛇毒”标记：锁定技，拥有“蛇毒”标记的角色回合开始时，需要选择弃置X张牌或者失去X点体力，然后弃置一枚“蛇毒”标记。X为其拥有的“蛇毒”标记个数。",
+			boss_duqu_info:
+				"锁定技，你受到伤害时，伤害来源获得1枚“蛇毒”标记；你自身不会拥有“蛇毒”标记；你的“桃”均视为“杀”。“蛇毒”标记：锁定技，拥有“蛇毒”标记的角色回合开始时，需要选择弃置X张牌或者失去X点体力，然后弃置一枚“蛇毒”标记。X为其拥有的“蛇毒”标记个数。",
 			boss_shedu: "蛇毒",
 			boss_jiushou: "九首",
-			boss_jiushou_info: "锁定技，你的手牌上限始终为9，你的出牌阶段开始时以及你的回合结束时，将手牌补至手牌上限，你始终跳过你的摸牌阶段。",
+			boss_jiushou_info:
+				"锁定技，你的手牌上限始终为9，你的出牌阶段开始时以及你的回合结束时，将手牌补至手牌上限，你始终跳过你的摸牌阶段。",
 			boss_echou_switch: "恶臭",
 			boss_echou: "恶臭",
-			boss_echou_info: "体力值首次减少至一半或更少时激活此技能。锁定技，除你之外的其他角色使用“桃”或“酒”时，获得1枚“蛇毒”标记。",
+			boss_echou_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，除你之外的其他角色使用“桃”或“酒”时，获得1枚“蛇毒”标记。",
 			boss_bingxian: "兵燹",
-			boss_bingxian_info: "锁定技，其他角色的回合结束时，若其回合内没有使用【杀】，则视为你对其使用一张【杀】。",
+			boss_bingxian_info:
+				"锁定技，其他角色的回合结束时，若其回合内没有使用杀，则视为你对其使用一张“杀”。",
 			boss_juyuan: "巨猿",
-			boss_juyuan_info: "锁定技，你的体力上限+5，你的出牌阶段内，若你的体力少于上一次你的回合结束时的体力，则你本回合使用【杀】可额外指定1个目标。",
+			boss_juyuan_info:
+				"锁定技，你的体力上限+5，你的出牌阶段内，若你的体力少于上一次你的回合结束时的体力，则你本回合使用“杀”可额外指定1个目标。",
 			boss_xushi_switch: "蓄势",
 			boss_xushi: "蓄势",
-			boss_xushi_info: "体力值首次减少至一半或更少时激活此技能。锁定技，你的出牌阶段结束时，你令自己翻面；当你的武将牌从背面翻至正面时，对所有其他角色造成随机1至2点伤害。",
+			boss_xushi_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，你的出牌阶段结束时，你令自己翻面；当你的武将牌从背面翻至正面时，对所有其他角色造成随机1至2点伤害。",
 			boss_zhaohuo: "兆火",
-			boss_zhaohuo_info: "锁定技，你造成的所有伤害均视为火属性伤害；你的回合中，所有其他角色的防具牌无效；你免疫所有火属性伤害。",
+			boss_zhaohuo_info:
+				"锁定技，你造成的所有伤害均视为火属性伤害；你的回合中，所有其他角色的防具牌无效；你免疫所有火属性伤害。",
 			boss_honglianx: "红莲",
-			boss_honglianx_info: "锁定技，你的红色牌不计入你的手牌上限；你的回合开始时，随机获得牌堆中0到3张红色牌，然后随机对3到0名其他角色各造成1点火属性伤害。",
+			boss_honglianx_info:
+				"锁定技，你的红色牌不计入你的手牌上限；你的回合开始时，随机获得牌堆中0到3张红色牌，然后随机对3到0名其他角色各造成1点火属性伤害。",
 			boss_yanyu: "炎狱",
 			boss_yanyu_switch: "炎狱",
-			boss_yanyu_info: "体力值首次减少至一半或更少时激活此技能。锁定技，其他角色回合开始时进行判定，若为红色则受到1点火属性伤害，并重复此过程（每个回合最多判定3次）。",
+			boss_yanyu_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，其他角色回合开始时进行判定，若为红色则受到1点火属性伤害，并重复此过程（每个回合最多判定3次）。",
 			boss_fengdong: "封冻",
 			boss_fengdong_info: "锁定技，你的回合内，其他角色的非锁定技无效。",
 			boss_xunyou: "巡游",
-			boss_xunyou_info: "锁定技，其他角色回合开始时，你随机获得场上除你以外的一名角色区域内的一张牌，若你获得的是装备牌，则你使用之。",
+			boss_xunyou_info:
+				"锁定技，其他角色回合开始时，你随机获得场上除你以外的一名角色区域内的一张牌，若你获得的是装备牌，则你使用之。",
 			boss_sipu: "司圃",
 			boss_sipu_switch: "司圃",
-			boss_sipu_info: "体力值首次减少至一半或更少时激活此技能。锁定技，你的出牌阶段内，若你使用的牌数小于等于2张，其他角色无法使用或打出牌。",
+			boss_sipu_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，你的出牌阶段内，若你使用的牌数小于等于2张，其他角色无法使用或打出牌。",
 
 			boss_wuzang: "无脏",
-			boss_wuzang_info: "锁定技，摸牌阶段，你的摸牌基数改为X（X为你的体力值一半且至少为5）；你的手牌上限基数为0。",
+			boss_wuzang_info:
+				"锁定技，摸牌阶段，你的摸牌基数改为X（X为你的体力值一半且至少为5）；你的手牌上限基数为0。",
 			boss_xiangde: "相德",
 			boss_xiangde_info: "锁定技，其他角色对你造成伤害时，若其装备区内有武器牌，此伤害+1。",
 			boss_yinzei: "隐贼",
 			boss_yinzei_switch: "隐贼",
-			boss_yinzei_info: "体力值首次减少至一半或更少时激活此技能。锁定技，若你没有手牌，其他角色对你造成伤害后，随机弃置一张牌。",
+			boss_yinzei_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，若你没有手牌，其他角色对你造成伤害后，随机弃置一张牌。",
 			boss_zhue: "助恶",
 			boss_zhue_info: "锁定技，每当一名其他角色造成伤害后，你与伤害来源各摸一张牌。",
 			boss_futai: "复态",
-			boss_futai_info: "锁定技，你的回合外，其他角色不能使用【桃】；你的回合开始时，你令所有角色回复1点体力。",
+			boss_futai_info:
+				"锁定技，你的回合外，其他角色不能使用【桃】；你的回合开始时，你令所有角色回复1点体力。",
 			boss_yandu: "厌笃",
 			boss_yandu_switch: "厌笃",
-			boss_yandu_info: "体力值首次减少至一半或更少时激活此技能。锁定技，其他角色回合结束后，若其未造成过伤害，你获得其一张牌。",
+			boss_yandu_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，其他角色回合结束后，若其未造成过伤害，你获得其一张牌。",
 			boss_minwan: "冥顽",
-			boss_minwan_info: "锁定技，当你于回合内使用牌对其他角色造成伤害后，你于此回合内使用牌只能指定你与这些角色为目标，且你每使用一张牌，摸一张牌。",
+			boss_minwan_info:
+				"锁定技，当你于回合内使用牌对其他角色造成伤害后，你于此回合内使用牌只能指定你与这些角色为目标，且你每使用一张牌，摸一张牌。",
 			boss_nitai: "拟态",
 			boss_nitai_info: "锁定技，防止你于回合内受到的伤害；你于回合外受到火属性伤害+1。",
 			boss_luanchang: "乱常",
 			boss_luanchang_switch: "乱常",
-			boss_luanchang_info: "体力值首次减少至一半或更少时激活此技能。锁定技，回合开始时，你视为使用【南蛮入侵】；回合结束时，你视为使用【万箭齐发】。",
+			boss_luanchang_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，回合开始时，你视为使用【南蛮入侵】；回合结束时，你视为使用【万箭齐发】。",
 			boss_tanyu: "贪欲",
 			boss_tanyu_info: "锁定技，跳过你的弃牌阶段；结束阶段，若你的手牌数为全场最多，失去1点体力。",
 			boss_cangmu: "藏目",
 			boss_cangmu_info: "锁定技，你令摸牌阶段摸牌基数改为X（X为存活角色数）。",
 			boss_jicai: "积财",
 			boss_jicai_switch: "积财",
-			boss_jicai_info: "体力值首次减少至一半或更少时激活此技能。锁定技，一名角色回复体力后，你与其各摸一张牌。",
+			boss_jicai_info:
+				"体力值首次减少至一半或更少时激活此技能。锁定技，一名角色回复体力后，你与其各摸一张牌。",
 			boss_xiongshou: "凶兽",
-			boss_xiongshou_info: "锁定技，你使用【杀】对体力值小于你的角色造成的伤害+1；你与其他角色距离-1；你不能被翻面。",
+			boss_xiongshou_info:
+				"锁定技，你使用【杀】对体力值小于你的角色造成的伤害+1；你与其他角色距离-1；你不能被翻面。",
 			sadouchengbing: "撒豆成兵",
-			sadouchengbing_info: "出牌阶段对自己使用，若你的势力为“神”，摸X张牌；否则将你手牌补至X；（X为你的体力上限且至多为5）。",
+			sadouchengbing_info:
+				"出牌阶段对自己使用，若你的势力为“神”，摸X张牌；否则将你手牌补至X；（X为你的体力上限且至多为5）。",
 			yihuajiemu: "移花接木",
 			yihuajiemu_info: "出牌阶段对一名有牌的其他角色使用，令其使用一张【杀】，或交给你两张牌。",
 			chiyanzhenhunqin: "赤焰镇魂琴",
@@ -9863,16 +9990,20 @@ export default () => {
 			juechenjinge: "绝尘金戈",
 			juechenjinge_info: "锁定技，敌方角色计算与己方其他角色距离+1。",
 			xiuluolianyuji: "修罗炼狱戟",
-			xiuluolianyuji_info: "你使用【杀】可以额外指定任意名攻击范围内的其他角色为目标；锁定技，你使用【杀】造成的伤害+1，然后令受到伤害的角色回复1点体力。",
+			xiuluolianyuji_info:
+				"你使用【杀】可以额外指定任意名攻击范围内的其他角色为目标；锁定技，你使用【杀】造成的伤害+1，然后令受到伤害的角色回复1点体力。",
 			longfenghemingjian: "鸾凤和鸣剑",
-			longfenghemingjian_info: "你使用的雷【杀】或火【杀】指定目标后，可令对方选择弃置一张牌或令你摸一张牌。",
+			longfenghemingjian_info:
+				"你使用的雷【杀】或火【杀】指定目标后，可令对方选择弃置一张牌或令你摸一张牌。",
 			qicaishenlu: "七彩神鹿",
 			qicaishenlu_info: "锁定技，你计算与其他角色的距离时-1，当你造成属性伤害时，你令此伤害+1。",
 			boss_mengpohuihun: "回魂",
-			boss_mengpohuihun_info: "若场上有角色在本局游戏中因孟婆的〖忘魂〗失去过技能，则令其恢复该技能；此牌进入弃牌堆后，会被销毁。",
+			boss_mengpohuihun_info:
+				"若场上有角色在本局游戏中因孟婆的〖忘魂〗失去过技能，则令其恢复该技能；此牌进入弃牌堆后，会被销毁。",
 			honghuangzhili: "洪荒之力",
 			honghuangzhili_cbg: "洪",
-			honghuangzhili_info: "若该角色的势力是神，你获得其一张牌，其〖神裔〗无效直到其下家的回合（这个下家是动态变化的，会随着一个人的死或者复活而变化）开始；若该角色的势力不是神，其翻面。",
+			honghuangzhili_info:
+				"若该角色的势力是神，你获得其一张牌，其〖神裔〗无效直到其下家的回合（这个下家是动态变化的，会随着一个人的死或者复活而变化）开始；若该角色的势力不是神，其翻面。",
 
 			boss_qingmushilian: "春之试炼",
 			boss_qinglong: "青龙",
@@ -9893,56 +10024,73 @@ export default () => {
 			boss_zhuanxu: "颛顼",
 
 			boss_lingqu: "灵躯",
-			boss_lingqu_info: "锁定技，当你受到伤害后，你摸一张牌，然后手牌上限+1；防止你受到的大于1点的伤害。",
+			boss_lingqu_info:
+				"锁定技，当你受到伤害后，你摸一张牌，然后手牌上限+1；防止你受到的大于1点的伤害。",
 			boss_zirun: "滋润",
-			boss_zirun_info: "锁定技，准备阶段开始时，你令所有角色摸一张牌，若其装备区内有牌，则其额外摸一张牌。",
+			boss_zirun_info:
+				"锁定技，准备阶段开始时，你令所有角色摸一张牌，若其装备区内有牌，则其额外摸一张牌。",
 			boss_juehong: "决洪",
-			boss_juehong_info: "锁定技，准备阶段开始时，你令所有敌方角色自己弃置自己的装备区内的所有牌，若其装备区内没有牌，则改为你弃置其一张手牌。",
+			boss_juehong_info:
+				"锁定技，准备阶段开始时，你令所有敌方角色自己弃置自己的装备区内的所有牌，若其装备区内没有牌，则改为你弃置其一张手牌。",
 			boss_zaoyi: "皂仪",
-			boss_zaoyi_info: "锁定技，只要水神玄冥存活，你不会成为敌方角色使用锦囊牌的目标，只要水神共工存活，你不会成为敌方角色使用基本牌的目标。水神玄冥和水神共工均死亡后，你摸四张牌，然后从下回合开始，每个回合开始时使体力值最少的敌方角色失去所有体力。",
+			boss_zaoyi_info:
+				"锁定技，只要水神玄冥存活，你不会成为敌方角色使用锦囊牌的目标，只要水神共工存活，你不会成为敌方角色使用基本牌的目标。水神玄冥和水神共工均死亡后，你摸四张牌，然后从下回合开始，每个回合开始时使体力值最少的敌方角色失去所有体力。",
 			boss_baiyi: "白仪",
-			boss_baiyi_info: "锁定技，每名敌方角色的摸牌阶段，若当前轮数小于3，其少摸一张牌；第五轮开始时，每名敌方角色弃置两张牌；当己方角色受到的雷电伤害时，若当前轮数小于7，其防止此伤害。",
+			boss_baiyi_info:
+				"锁定技，每名敌方角色的摸牌阶段，若当前轮数小于3，其少摸一张牌；第五轮开始时，每名敌方角色弃置两张牌；当己方角色受到的雷电伤害时，若当前轮数小于7，其防止此伤害。",
 			boss_qingzhu: "擎柱",
 			boss_qingzhu_info: "锁定技，你跳过弃牌阶段，若你没有“殛顶”，你于出牌阶段不能使用【杀】。",
 			boss_jiazu: "枷足",
 			boss_jiazu_info: "锁定技，回合开始时，弃置你上家和下家的敌方角色的装备区内的坐骑牌。",
 			boss_jiding: "殛顶",
-			boss_jiding_info: "锁定技，其他己方角色受到伤害后，若伤害来源为敌方角色，则你视为对伤害来源使用雷【杀】，若此【杀】造成伤害，蓐收回复1点体力。然后你失去此技能（只有发动了才会失去，没发动不会失去）。",
+			boss_jiding_info:
+				"锁定技，其他己方角色受到伤害后，若伤害来源为敌方角色，则你视为对伤害来源使用雷【杀】，若此【杀】造成伤害，蓐收回复1点体力。然后你失去此技能（只有发动了才会失去，没发动不会失去）。",
 			boss_xingqiu: "刑秋",
-			boss_xingqiu_info: "锁定技，每两轮的出牌阶段开始时，你横置所有敌方角色，然后使明刑柱获得〖殛顶〗。",
+			boss_xingqiu_info:
+				"锁定技，每两轮的出牌阶段开始时，你横置所有敌方角色，然后使明刑柱获得〖殛顶〗。",
 			boss_kuangxiao: "狂啸",
 			boss_kuangxiao_info: "锁定技，你的回合内，你使用【杀】没有距离限制，且指定所有敌方角色为目标。",
 			boss_shenyi: "神裔",
 			boss_shenyi_info: "锁定技，你的武将牌始终正面向上，你的判定区内的牌效果反转。",
 			boss_shenen: "神恩",
-			boss_shenen_info: "锁定技，所有己方角色使用牌无距离限制；所有敌方角色摸牌阶段多摸一张牌且手牌上限+1。",
+			boss_shenen_info:
+				"锁定技，所有己方角色使用牌无距离限制；所有敌方角色摸牌阶段多摸一张牌且手牌上限+1。",
 			boss_fentian: "焚天",
-			boss_fentian_info: "锁定技，你造成的伤害视为火焰伤害；你使用红色牌无距离和次数限制，且不可被其他角色使用【闪】或【无懈可击】响应。",
+			boss_fentian_info:
+				"锁定技，你造成的伤害视为火焰伤害；你使用红色牌无距离和次数限制，且不可被其他角色使用【闪】或【无懈可击】响应。",
 			boss_fentian2: "焚天",
 			boss_xingxia: "行夏",
-			boss_xingxia_info: "每两轮限一次，出牌阶段，你可以对焰灵造成2点火焰伤害，然后令每名敌方角色选择一项：1.弃置一张红色牌；2.你对其造成1点火焰伤害。",
+			boss_xingxia_info:
+				"每两轮限一次，出牌阶段，你可以对焰灵造成2点火焰伤害，然后令每名敌方角色选择一项：1.弃置一张红色牌；2.你对其造成1点火焰伤害。",
 			boss_huihuo: "回火",
-			boss_huihuo_info: "锁定技，当你死亡时，你对所有敌方角色各造成3点火焰伤害；出牌阶段，你可以多使用一张【杀】。",
+			boss_huihuo_info:
+				"锁定技，当你死亡时，你对所有敌方角色各造成3点火焰伤害；出牌阶段，你可以多使用一张【杀】。",
 			boss_furan: "复燃",
 			boss_furan2: "复燃",
 			boss_furan_info: "当你濒死时，所有敌方角色视为可以将红色牌当【桃】对你使用。",
 			boss_chiyi: "赤仪",
 			boss_chiyi2: "赤仪",
-			boss_chiyi_info: "锁定技，从第三轮开始，敌方角色受到的伤害+1；第五轮开始时，你对所有角色各造成1点火焰伤害；第七轮开始时，你对焰灵造成5点火焰伤害。",
+			boss_chiyi_info:
+				"锁定技，从第三轮开始，敌方角色受到的伤害+1；第五轮开始时，你对所有角色各造成1点火焰伤害；第七轮开始时，你对焰灵造成5点火焰伤害。",
 			boss_buchun: "布春",
-			boss_buchun_info: "每两轮限一次，出牌阶段，若场上有死亡的树精，你可以失去1点体力，复活所有树精，使其回复体力至1点，补充手牌至两张；若场上没有死亡的树精，你可以为一名己方角色回复2点体力。",
+			boss_buchun_info:
+				"每两轮限一次，出牌阶段，若场上有死亡的树精，你可以失去1点体力，复活所有树精，使其回复体力至1点，补充手牌至两张；若场上没有死亡的树精，你可以为一名己方角色回复2点体力。",
 			boss_cuidu: "淬毒",
-			boss_cuidu_info: "锁定技，你对敌方角色造成伤害后，若其没有“中毒”，你令其获得“中毒”，然后令木神勾芒摸一张牌。",
+			boss_cuidu_info:
+				"锁定技，你对敌方角色造成伤害后，若其没有“中毒”，你令其获得“中毒”，然后令木神勾芒摸一张牌。",
 			boss_zhongdu: "中毒",
 			boss_zhongdu_bg: "毒",
-			boss_zhongdu_info: "锁定技，回合开始时，你进行判定，若结果不为红桃，你受到1点无来源的伤害，若结果不为黑桃，你失去此技能。",
+			boss_zhongdu_info:
+				"锁定技，回合开始时，你进行判定，若结果不为红桃，你受到1点无来源的伤害，若结果不为黑桃，你失去此技能。",
 			boss_qingyi: "青仪",
-			boss_qingyi_info: "锁定技，第三轮开始时，己方角色各回复1点体力；第五轮开始时，敌方角色各失去1点体力；第七轮开始时，复活木神勾芒和树精，使其各摸三张牌，各+1体力上限，然后各回复3点体力。",
+			boss_qingyi_info:
+				"锁定技，第三轮开始时，己方角色各回复1点体力；第五轮开始时，敌方角色各失去1点体力；第七轮开始时，复活木神勾芒和树精，使其各摸三张牌，各+1体力上限，然后各回复3点体力。",
 
 			boss_guimou: "鬼谋",
 			boss_guimou_info: "结束阶段，你可以令一名随机的其他角色进入混乱状态直到其下一回合结束。",
 			boss_yuance: "远策",
-			boss_yuance_info: "每当一名角色受到其他角色的伤害，你可以选择一项并进行一次判定：1. 若结果为黑色，受伤害角色失去1点体力，否则伤害来源失去1点体力；2. 若结果为红色，受伤害角色回复1点体力，否则伤害来源回复1点体力。",
+			boss_yuance_info:
+				"每当一名角色受到其他角色的伤害，你可以选择一项并进行一次判定：1. 若结果为黑色，受伤害角色失去1点体力，否则伤害来源失去1点体力；2. 若结果为红色，受伤害角色回复1点体力，否则伤害来源回复1点体力。",
 			boss_qizuo: "奇佐",
 			boss_qizuo_info: "你可以令你的普通锦囊牌额外结算一次。",
 			boss_guixin: "归心",
@@ -9950,11 +10098,14 @@ export default () => {
 			xiongcai: "雄才",
 			xiongcai_info: "锁定技，你在回合结束后随机获得一个魏势力角色的所有技能。",
 			xiaoxiong: "枭雄",
-			xiaoxiong_info: "锁定技，每当一名其他角色使用一张基本牌或锦囊牌，你获得一张与之同名的牌；在一名其他角色的结束阶段，若其本回合没有使用牌，你对其造成1点伤害。",
+			xiaoxiong_info:
+				"锁定技，每当一名其他角色使用一张基本牌或锦囊牌，你获得一张与之同名的牌；在一名其他角色的结束阶段，若其本回合没有使用牌，你对其造成1点伤害。",
 			boss_zhangwu: "章武",
-			boss_zhangwu_info: "每当你受到一次伤害，你可以弃置任意张牌并令伤害来源选择一项：弃置等量的牌，或受到等量的伤害。",
+			boss_zhangwu_info:
+				"每当你受到一次伤害，你可以弃置任意张牌并令伤害来源选择一项：弃置等量的牌，或受到等量的伤害。",
 			xiangxing: "禳星",
-			xiangxing_info: "锁定技，游戏开始时，你获得7枚星；每当你累计扣减7点体力，你失去一枚星，并造成7点雷属性伤害，随机分配给其他角色；当你失去全部星后，你的体力上限变为3。",
+			xiangxing_info:
+				"锁定技，游戏开始时，你获得7枚星；每当你累计扣减7点体力，你失去一枚星，并造成7点雷属性伤害，随机分配给其他角色；当你失去全部星后，你的体力上限变为3。",
 			yueyin: "月隐",
 			yueyin_info: "锁定技，你的每一枚星对应的一个特定条件，当你失去星时，若满足此条件，则不造成伤害。",
 			xiangxing7_info: "你没有手牌",
@@ -9965,7 +10116,8 @@ export default () => {
 			xiangxing2_info: "你的判定区内至少有两张牌",
 			xiangxing1_info: "场上只有2名存活角色",
 			gaiming: "改命",
-			gaiming_info: "锁定技，在你的判定牌生效前，你观看牌堆顶的七张牌并选择一张作为判定结果，此结果不可更改。",
+			gaiming_info:
+				"锁定技，在你的判定牌生效前，你观看牌堆顶的七张牌并选择一张作为判定结果，此结果不可更改。",
 			fengqi: "风起",
 			fengqi_info: "准备阶段和结束阶段，你可以视为使用任意一张普通锦囊牌。",
 
@@ -9977,26 +10129,32 @@ export default () => {
 			tiandao_info: "任意一名角色的判定生效前，你可以打出一张牌替换之。",
 			yunshen: "云身",
 			yunshen2: "云身",
-			yunshen_info: "每当你使用或打出一张闪时，你可以令你的防御距离+1；准备阶段，你将累计的防御距离清零，然后摸等量的牌。",
+			yunshen_info:
+				"每当你使用或打出一张闪时，你可以令你的防御距离+1；准备阶段，你将累计的防御距离清零，然后摸等量的牌。",
 			lianji: "连计",
-			lianji_info: "出牌阶段限一次，你可以选择一张手牌并指定两名角色进行拼点，拼点赢的角色获得此牌，并对没赢的角色造成1点伤害。",
+			lianji_info:
+				"出牌阶段限一次，你可以选择一张手牌并指定两名角色进行拼点，拼点赢的角色获得此牌，并对没赢的角色造成1点伤害。",
 			mazui: "麻醉",
 			mazui2: "麻醉",
-			mazui_info: "出牌阶段限一次，你可以将一张黑色手牌置于一名角色的武将牌上，该角色造成的下一次伤害-1，然后获得此牌。",
+			mazui_info:
+				"出牌阶段限一次，你可以将一张黑色手牌置于一名角色的武将牌上，该角色造成的下一次伤害-1，然后获得此牌。",
 
 			boss_nbianshen: "变形",
 			boss_nbianshenx: "变形",
 			boss_nbianshenx_info: "你从第二轮开始，每一轮幻化为警觉、任性、睿智、暴怒四种随机状态中的一种。",
 			boss_mengtai: "萌态",
-			boss_mengtai_info: "锁定技，若你的出牌阶段被跳过，你跳过本回合的弃牌阶段；若你的摸牌阶段被跳过，结束阶段开始时，你摸三张牌。",
+			boss_mengtai_info:
+				"锁定技，若你的出牌阶段被跳过，你跳过本回合的弃牌阶段；若你的摸牌阶段被跳过，结束阶段开始时，你摸三张牌。",
 			boss_ruizhi: "睿智",
-			boss_ruizhi_info: "锁定技，其他角色的准备阶段开始时，其选择一张手牌和一张装备区里的牌，然后弃置其余的牌。",
+			boss_ruizhi_info:
+				"锁定技，其他角色的准备阶段开始时，其选择一张手牌和一张装备区里的牌，然后弃置其余的牌。",
 			boss_jingjue: "警觉",
 			boss_jingjue_info: "每当你于回合外失去牌时，你可以进行一次判定，若结果为红色，你回复1点体力。",
 			boss_renxing: "任性",
 			boss_renxing_info: "锁定技，你的回合外，一名角色受到1点伤害后或回复1点体力时，你摸一张牌。",
 			boss_nbaonu: "暴怒",
-			boss_nbaonu_info: "锁定技，摸牌阶段，你改为摸X张牌（X为4到你体力值间的随机数）；若你的体力值小于5，则你使用【杀】造成的伤害+1且无次数限制。",
+			boss_nbaonu_info:
+				"锁定技，摸牌阶段，你改为摸X张牌（X为4到你体力值间的随机数）；若你的体力值小于5，则你使用【杀】造成的伤害+1且无次数限制。",
 			boss_shouyi: "兽裔",
 			boss_shouyi_info: "锁定技，你使用牌无距离限制。",
 
@@ -10005,7 +10163,8 @@ export default () => {
 			boss_qixiang: "祺祥",
 			boss_qixiang1: "祺祥",
 			boss_qixiang2: "祺祥",
-			boss_qixiang_info: "乐不思蜀判定时，你的方块判定牌视为红桃；兵粮寸断判定时，你的黑桃判定牌视为草花。",
+			boss_qixiang_info:
+				"乐不思蜀判定时，你的方块判定牌视为红桃；兵粮寸断判定时，你的黑桃判定牌视为草花。",
 
 			qiwu: "栖梧",
 			qiwu_info: "锁定技。每当你使用一张梅花牌，你回复1点体力。",
@@ -10015,7 +10174,8 @@ export default () => {
 			boss_yushou: "驭兽",
 			boss_yushou_info: "出牌阶段开始时，你可以对所有敌方角色使用一张【南蛮入侵】。",
 			boss_moyany: "魔炎",
-			boss_moyany_info: "每当你于回合外失去牌时，你可以进行一次判定，若结果为红色，你对一名其他角色造成2点火焰伤害。",
+			boss_moyany_info:
+				"每当你于回合外失去牌时，你可以进行一次判定，若结果为红色，你对一名其他角色造成2点火焰伤害。",
 			boss_modao: "魔道",
 			boss_modao_info: "锁定技，准备阶段，你摸两张牌。",
 			boss_mojian: "魔箭",
@@ -10064,7 +10224,8 @@ export default () => {
 			boss_chiyan_intro2_info: "挑战火神祝融、焰灵",
 			boss_chiyan_intro3: "&nbsp;第三关",
 			boss_chiyan_intro3_info: "挑战炎帝、火神祝融、焰灵",
-			boss_chiyan_intro3_append: "每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
+			boss_chiyan_intro3_append:
+				"每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
 
 			boss_qingmu_intro1: "&nbsp;第一关",
 			boss_qingmu_intro1_info: "挑战青龙",
@@ -10072,7 +10233,8 @@ export default () => {
 			boss_qingmu_intro2_info: "挑战木神勾芒、树精",
 			boss_qingmu_intro3: "&nbsp;第三关",
 			boss_qingmu_intro3_info: "挑战太昊、木神勾芒、树精",
-			boss_qingmu_intro3_append: "每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
+			boss_qingmu_intro3_append:
+				"每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
 
 			boss_xuanlin_intro1: "&nbsp;第一关",
 			boss_xuanlin_intro1_info: "挑战玄武",
@@ -10080,7 +10242,8 @@ export default () => {
 			boss_xuanlin_intro2_info: "挑战水神玄冥、水神共工",
 			boss_xuanlin_intro3: "&nbsp;第三关",
 			boss_xuanlin_intro3_info: "挑战颛顼、水神玄冥、水神共工",
-			boss_xuanlin_intro3_append: "每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
+			boss_xuanlin_intro3_append:
+				"每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
 
 			boss_baimang_intro1: "&nbsp;第一关",
 			boss_baimang_intro1_info: "挑战白虎",
@@ -10088,7 +10251,8 @@ export default () => {
 			boss_baimang_intro2_info: "挑战金神蓐收、明刑柱",
 			boss_baimang_intro3: "&nbsp;第三关",
 			boss_baimang_intro3_info: "挑战少昊、金神蓐收、明刑柱",
-			boss_baimang_intro3_append: "每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
+			boss_baimang_intro3_append:
+				"每通过一关，游戏轮数清零，阵亡角色复活，所有角色重置武将和区域内的牌，并获得4-X张起始手牌，X为阵亡角色数。",
 
 			boss_bianshen_intro1: "&nbsp;第一关",
 			boss_bianshen_intro1_info: "挑战魑、魅、魍、魉中的随机一个",
@@ -10109,41 +10273,51 @@ export default () => {
 			boss_qiangzheng_info: "锁定技，结束阶段，你获得每个敌方角色的一张手牌。",
 			boss_baolin: "暴凌",
 			guizhen: "归真",
-			guizhen_info: "每当你失去最后一张手牌，你可以所有敌人失去全部手牌，没有手牌的角色失去1点体力（不触发技能）。",
+			guizhen_info:
+				"每当你失去最后一张手牌，你可以所有敌人失去全部手牌，没有手牌的角色失去1点体力（不触发技能）。",
 			boss_shengshou: "圣手",
 			boss_shengshou_info: "每当你使用一张牌，你可以进行一次判定，若为红色，你回复1点体力。",
 			wuqin: "五禽戏",
 			wuqin_info: "结束阶段，若你没有手牌，可以摸三张牌。",
 
 			boss_konghun: "控心",
-			boss_konghun_info: "结束阶段，你可以指定一名敌人令其进入混乱状态（不受对方控制，并将队友视为敌人）直到下一回合开始。",
+			boss_konghun_info:
+				"结束阶段，你可以指定一名敌人令其进入混乱状态（不受对方控制，并将队友视为敌人）直到下一回合开始。",
 			yuehun: "月魂",
 			yuehun_info: "结束阶段，你可以回复1点体力并摸两张牌。",
 			fengwu: "风舞",
-			fengwu_info: "出牌阶段限一次，可令除你外的所有角色依次对与其距离最近的另一名角色使用一张【杀】，无法如此做者失去1点体力。",
+			fengwu_info:
+				"出牌阶段限一次，可令除你外的所有角色依次对与其距离最近的另一名角色使用一张【杀】，无法如此做者失去1点体力。",
 			boss_wange: "笙歌",
 
 			huanhua: "幻化",
-			huanhua_info: "锁定技，游戏开始时，你获得其他角色的所有技能，体力上限变为其他角色之和；其他角色于摸牌阶段摸牌时，你摸等量的牌；其他角色于弃牌阶段弃牌时，你弃置等量的手牌。",
+			huanhua_info:
+				"锁定技，游戏开始时，你获得其他角色的所有技能，体力上限变为其他角色之和；其他角色于摸牌阶段摸牌时，你摸等量的牌；其他角色于弃牌阶段弃牌时，你弃置等量的手牌。",
 
 			boss_leiji: "雷击",
-			boss_leiji_info: "每当你使用或打出一张【闪】，可令任意一名角色进行一次判定，若结果为黑色，其受到1点雷电伤害，然后你摸一张牌。",
+			boss_leiji_info:
+				"每当你使用或打出一张【闪】，可令任意一名角色进行一次判定，若结果为黑色，其受到1点雷电伤害，然后你摸一张牌。",
 			jidian: "亟电",
-			jidian_info: "每当你造成一次伤害，可以指定距离受伤害角色1以内的一名其他角色进行判定，若结果为黑色，该角色受到1点雷电伤害。",
+			jidian_info:
+				"每当你造成一次伤害，可以指定距离受伤害角色1以内的一名其他角色进行判定，若结果为黑色，该角色受到1点雷电伤害。",
 
 			tinqin: "听琴",
 			boss_guihan: "归汉",
-			boss_guihan_info: "限定技，濒死阶段，你可以将体力回复至体力上限，摸四张牌，令所有敌人的技能恢复，失去技能〖悲歌〗和〖胡笳〗，并获得技能〖听琴〗、〖蕙质〗。",
+			boss_guihan_info:
+				"限定技，濒死阶段，你可以将体力回复至体力上限，摸四张牌，令所有敌人的技能恢复，失去技能〖悲歌〗和〖胡笳〗，并获得技能〖听琴〗、〖蕙质〗。",
 			boss_huixin: "蕙质",
-			boss_huixin_info: "每当你于回合外失去牌，可以进行一次判定，若为黑色，当前回合角色失去1点体力，否则你回复1点体力并摸一张牌。",
+			boss_huixin_info:
+				"每当你于回合外失去牌，可以进行一次判定，若为黑色，当前回合角色失去1点体力，否则你回复1点体力并摸一张牌。",
 			boss_hujia: "胡笳",
-			boss_hujia_info: "结束阶段，若你已受伤，可以弃置一张牌令一名其他角色的所有技能失效，若其所有技能已失效，改为令其失去1点体力上限。",
+			boss_hujia_info:
+				"结束阶段，若你已受伤，可以弃置一张牌令一名其他角色的所有技能失效，若其所有技能已失效，改为令其失去1点体力上限。",
 			boss_honglian: "红莲",
 			boss_honglian_info: "锁定技，结束阶段，你摸两张牌，并对所有敌人造成1点火焰伤害。",
 			huoshen: "火神",
 			huoshen_info: "锁定技，你防止即将受到的火焰伤害，改为回复1点体力。",
 			boss_xianyin: "仙音",
-			boss_xianyin_info: "每当你于回合外失去牌，你可以进行一次判定，若为红色，你令一名敌人失去1点体力。",
+			boss_xianyin_info:
+				"每当你于回合外失去牌，你可以进行一次判定，若为红色，你令一名敌人失去1点体力。",
 
 			boss_yuhuo: "浴火",
 			boss_yuhuo_info: "觉醒技，在你涅槃后，你获得技能〖神威〗、〖朱羽〗。",
@@ -10163,31 +10337,39 @@ export default () => {
 			tashui_info: "每当你使用或打出一张黑色牌，你可以令一名其他角色翻面。",
 
 			boss_wuxin: "无心",
-			boss_wuxin_info: "锁定技，你防止即将受到的伤害，改为失去1点体力；你不能成为其他角色的延时锦囊的目标。",
+			boss_wuxin_info:
+				"锁定技，你防止即将受到的伤害，改为失去1点体力；你不能成为其他角色的延时锦囊的目标。",
 			shangshix: "伤逝",
 			shangshix2: "伤逝",
-			shangshix_info: "锁定技，你的手牌数至少为4，结束阶段，若你的体力值大于1，你令场上所有角色失去1点体力。",
+			shangshix_info:
+				"锁定技，你的手牌数至少为4，结束阶段，若你的体力值大于1，你令场上所有角色失去1点体力。",
 
 			boss_baonu: "暴怒",
-			boss_baonu_info: "锁定技，当你的体力值降至4或更低时，你变身为暴怒战神或神鬼无前，并立即开始你的回合。",
+			boss_baonu_info:
+				"锁定技，当你的体力值降至4或更低时，你变身为暴怒战神或神鬼无前，并立即开始你的回合。",
 			shenwei: "神威",
-			shenwei_info: "锁定技，摸牌阶段，你额外摸X张牌，你的手牌上限+X（X为场上其他角色的数目且至多为3）。",
+			shenwei_info:
+				"锁定技，摸牌阶段，你额外摸X张牌，你的手牌上限+X（X为场上其他角色的数目且至多为3）。",
 			xiuluo: "修罗",
-			xiuluo_info: "准备阶段，你可以弃置一张牌，然后弃置你判定区内一张同花色的牌，然后你可以重复此流程。",
+			xiuluo_info:
+				"准备阶段，你可以弃置一张牌，然后弃置你判定区内一张同花色的牌，然后你可以重复此流程。",
 			shenqu: "神躯",
-			shenqu_info: "每名角色的准备阶段，若你的手牌数少于或等于你的体力上限数，你可以摸两张牌；当你受到伤害后，你可以使用一张【桃】。",
+			shenqu_info:
+				"每名角色的准备阶段，若你的手牌数少于或等于你的体力上限数，你可以摸两张牌；当你受到伤害后，你可以使用一张【桃】。",
 			jiwu: "极武",
-			jiwu_info: "出牌阶段，你可以弃置一张牌，然后获得获得以下一项技能直到回合结束：〖强袭〗、〖铁骑〗、〖旋风〗、〖完杀〗。",
+			jiwu_info:
+				"出牌阶段，你可以弃置一张牌，然后获得获得以下一项技能直到回合结束：〖强袭〗、〖铁骑〗、〖旋风〗、〖完杀〗。",
 
 			boss_jingjia: "精甲",
 			boss_jingjia_info: "锁定技，游戏开始时，将本局游戏中加入的装备随机置入你的装备区。",
 			boss_aozhan: "鏖战",
-			boss_aozhan_info: "锁定技，若你装备区内有：武器牌，你可以多使用一张【杀】；防具牌，防止你受到的超过1点的伤害；坐骑牌，摸牌阶段多摸一张牌；宝物牌，跳过你的判定阶段。",
+			boss_aozhan_info:
+				"锁定技，若你装备区内有：武器牌，你可以多使用一张【杀】；防具牌，防止你受到的超过1点的伤害；坐骑牌，摸牌阶段多摸一张牌；宝物牌，跳过你的判定阶段。",
 
 			boss_qinguangwang_ab: "秦广王",
 			boss_qinguangwang: "秦广王·蒋子文",
 			boss_panguan: "判官",
-			boss_panguan_info: "锁定技，你不能成为延时类锦囊的目标。",
+			boss_panguan_info: "	锁定技，你不能成为延时类锦囊的目标。",
 			boss_juhun: "拘魂",
 			boss_juhun_info: "锁定技，结束阶段，你令随机一名其他角色的武将牌翻面或横置。",
 			boss_wangxiang: "望乡",
@@ -10196,7 +10378,6 @@ export default () => {
 			boss_chujiangwang: "楚江王·厉温",
 			boss_bingfeng: "冰封",
 			boss_bingfeng_info: "锁定技，你死亡时，若杀死你的角色武将牌是正面朝上， 你令其翻面。",
-			boss_songdiwang_ab: "宋帝王",
 			boss_songdiwang: "宋帝王·余懃",
 			boss_heisheng: "黑绳",
 			boss_heisheng_info: "锁定技，你死亡时，横置所有场上角色。",
@@ -10207,7 +10388,8 @@ export default () => {
 			boss_zhiwang: "治妄",
 			boss_zhiwang_info: "锁定技，当其他角色于摸牌阶段外得到牌时，你随机弃置其一张手牌。",
 			boss_zhiwang_planetarian: "注意事项",
-			boss_zhiwang_planetarian_info: "若触发〖治妄〗的角色因〖治妄〗触发的其他的技能（如〖伤逝〗〖连营〗等）继续得到了牌，则该角色将其武将牌变更为孙策。",
+			boss_zhiwang_planetarian_info:
+				"若触发〖治妄〗的角色因〖治妄〗触发的其他的技能（如〖伤逝〗〖连营〗等）继续得到了牌，则该角色将其武将牌变更为孙策。",
 			boss_gongzheng: "公正",
 			boss_gongzheng_info: "锁定技，准备阶段，若你判定区有牌，你随机弃置一张你判定区的牌。",
 			boss_xuechi: "血池",
@@ -10239,9 +10421,11 @@ export default () => {
 			boss_dushiwang_ab: "都市王",
 			boss_dushiwang: "都市王·黄中庸",
 			boss_remen: "热闷",
-			boss_remen_info: "锁定技，若你的装备区内没有防具牌，则【南蛮入侵】、【万箭齐发】和普通【杀】对你无效。",
+			boss_remen_info:
+				"锁定技，若你的装备区内没有防具牌，则【南蛮入侵】、【万箭齐发】和普通【杀】对你无效。",
 			boss_zhifen: "炙焚",
-			boss_zhifen_info: "锁定技，准备阶段，你随机选择一名其他角色，获得其一张手牌（没有则不获得），并对其造成1点火属性伤害。",
+			boss_zhifen_info:
+				"锁定技，准备阶段，你随机选择一名其他角色，获得其1张手牌（没有则不获得），并对其造成1点火属性伤害。",
 			boss_huoxing: "火刑",
 			boss_huoxing_info: "锁定技，你死亡时，你对所有其他角色造成1点火属性伤害。",
 			boss_pingdengwang_ab: "平等王",
@@ -10249,42 +10433,53 @@ export default () => {
 			boss_suozu: "锁足",
 			boss_suozu_info: "锁定技，准备阶段，你令所有其他角色横置。",
 			boss_abi: "阿鼻",
-			boss_abi_info: "锁定技，锁定技，你受到伤害时，你对伤害来源造成伤害的角色造成1点随机属性伤害（雷或火随机）。",
+			boss_abi_info:
+				"锁定技，锁定技，你受到伤害时，你对伤害来源造成伤害的角色造成1点随机属性伤害（雷或火随机）。",
 			boss_pingdeng: "平等",
-			boss_pingdeng_info: "锁定技，你死亡时，你对体力最多的一名其他角色造成2点随机属性伤害（属性随机），然后再对一名体力最多的其他角色造成1点随机属性伤害（属性随机）。",
+			boss_pingdeng_info:
+				"锁定技，你死亡时，你对体力最多的一名其他角色造成2点随机属性伤害（属性随机），然后再对一名体力最多的其他角色造成1点随机属性伤害（属性随机）。",
 			boss_zhuanlunwang_ab: "转轮王",
 			boss_zhuanlunwang: "转轮王·薛礼",
 			boss_lunhui: "轮回",
-			boss_lunhui_info: "锁定技，准备阶段，若你的体力小于等于2，则你与场上除你以外体力最高且大于2的角色交换体力值。",
+			boss_lunhui_info:
+				"锁定技，准备阶段，若你的体力小于等于2，则你与场上除你以外体力最高且大于2的角色交换体力值。",
 			boss_wangsheng: "往生",
 			boss_wangsheng_info: "锁定技，你的出牌阶段开始时，视为你随机使用一张【南蛮入侵】或【万箭齐发】。",
 			boss_zlfanshi: "反噬",
-			boss_zlfanshi_info: "锁定技，每个回合你受到第一次伤害后，若再次受到伤害，则对随机一名其他角色造成1点伤害。",
-			boss_shikieiki_ab: "四季映姬",
+			boss_zlfanshi_info:
+				"锁定技，每个回合你受到第一次伤害后，若再次受到伤害，则对随机一名其他角色造成1点伤害。",
+			boss_shikieiki_ab: "四季映姫",
 			boss_shikieiki: "四季映姬·夜魔仙那度",
 			boss_yingzhong: "映冢",
 			boss_yingzhong_info: "锁定技。你登场后的第一个回合开始时，你随机获得两个“阴间武将”的全部技能。",
-			boss_yingzhong_append: '<span style="font-family:yuanli">四季映姬到阴曹地府<br>——阴(映)到家了！</span>',
+			boss_yingzhong_append:
+				'<span style="font-family:yuanli">四季映姬到阴曹地府<br>——阴(映)到家了！</span>',
 			//孟婆:
 			boss_mengpo: "孟婆",
 			boss_shiyou: "拾忧",
-			boss_shiyou_info: "其他角色于弃牌阶段弃置的牌进入弃牌堆前，你可以选择其中任意张花色各不相同的牌获得之。",
+			boss_shiyou_info:
+				"其他角色于弃牌阶段弃置的牌进入弃牌堆前，你可以选择其中任意张花色各不相同的牌获得之。",
 			boss_wanghun: "忘魂",
-			boss_wanghun_info: "锁定技，你死亡时，令随机两名敌方角色各随机失去一个技能（主公技除外），并在牌堆中加入2张回魂。(回魂只能在挑战模式出现)",
+			boss_wanghun_info:
+				"锁定技，你死亡时，令随机两名敌方角色各随机失去一个技能（主公技除外），并在牌堆中加入2张回魂。(回魂只能在挑战模式出现)",
 			boss_wangshi: "往事",
-			boss_wangshi_info: "锁定技，你存活时，敌方角色的回合开始时，令其于本回合不能使用或打出随机一种类型的牌（基本、锦囊、装备）。",
+			boss_wangshi_info:
+				"锁定技，你存活时，敌方角色的回合开始时，令其于本回合不能使用或打出随机一种类型的牌（基本、锦囊、装备）。",
 			boss_wangshi2: "往事",
 			boss_wangshi2_info: "",
 			//地藏王:
 			boss_dizangwang: "地藏王",
 			boss_bufo: "不佛",
-			boss_bufo_info: "锁定技，你的回合开始时，你对所有距离为1的其他角色造成1点火焰伤害；你受到大于等于2的伤害时，令此伤害-1。",
+			boss_bufo_info:
+				"锁定技，你的回合开始时，你对所有距离为1的其他角色造成1点火焰伤害；你受到大于等于2的伤害时，令此伤害-1。",
 			boss_wuliang: "无量",
-			boss_wuliang_info: "锁定技，你登场时额外摸三张牌；结束阶段开始时，你摸两张牌；你的回合开始时，若你当前体力小于3，则回复至3。",
+			boss_wuliang_info:
+				"锁定技，你登场时额外摸三张牌；结束阶段开始时，你摸两张牌；你的回合开始时，若你当前体力小于3，则回复至3。",
 			boss_dayuan: "大愿",
 			boss_dayuan_info: " 当一名角色判定牌最终生效前，你可以指定该判定牌的点数和花色。",
 			boss_diting: "谛听",
-			boss_diting_info: "锁定技，你的坐骑区被废除，你与别人计算距离时-1，别人与你计算距离时+1；你的坐骑牌均用于重铸。",
+			boss_diting_info:
+				"锁定技，你的坐骑区被废除，你与别人计算距离时-1，别人与你计算距离时+1；你的坐骑牌均用于重铸。",
 			/*
 			//等阶
 			"boss_sdyl_playerlevel1":"一阶",
@@ -10297,7 +10492,7 @@ export default () => {
 			"boss_sdyl_playerlevel4_info":"摸牌阶段多摸一张牌，起始手牌+1。",
 			"boss_sdyl_playerlevel5":"重生",
 			"boss_sdyl_playerlevel5_info":"限定技，当你处于濒死状态时，你可以弃置所有判定区牌，然后复原你的武将牌，将手牌补充至手牌体力上限（至多为5），将体力回复至体力上限。",
-	
+
 			"boss_sdyl_bosslevel1":"一阶",
 			"boss_sdyl_bosslevel1_info":"",
 			"boss_sdyl_bosslevel2":"二阶",
@@ -10311,21 +10506,26 @@ export default () => {
 			*/
 			boss_sunce: "那个男人",
 			boss_hunzi: "魂姿",
-			boss_hunzi_info: "觉醒技，准备阶段，若你的体力值为1，你减1点体力上限，失去技能〖魂佑〗并获得技能〖英姿〗和〖英魂〗。",
+			boss_hunzi_info:
+				"觉醒技，准备阶段，若你的体力值为1，你减1点体力上限，失去技能〖魂佑〗并获得技能〖英姿〗和〖英魂〗。",
 			boss_jiang: "激昂",
-			boss_jiang_info: "①锁定技，〖激昂〗不会无效。②每当你使用或打出红色牌时，你可以摸一张牌。若你是因响应其他角色使用或打出的牌，则你获得对方使用或打出的牌。③当有其他角色使用或打出红色牌指定你为目标或响应你后，你可以摸一张牌并获得这些牌。",
+			boss_jiang_info:
+				"①锁定技，〖激昂〗不会无效。<br>②每当你使用或打出红色牌时，你可以摸一张牌。若你是因响应其他角色使用或打出的牌，则你获得对方使用或打出的牌。<br>③当有其他角色使用或打出红色牌指定你为目标或响应你后，你可以摸一张牌并获得这些牌。",
 			boss_hunyou: "魂佑",
 			boss_hunyou_info: "锁定技，你的体力值变化和体力上限变化无效。",
 			boss_taoni: "讨逆",
-			boss_taoni_info: "锁定技，游戏开始时，每名角色回合开始时或你死亡时，你检查存活角色的合法性。若有角色存在非法行为，则你终止本局游戏。",
+			boss_taoni_info:
+				"锁定技，游戏开始时，每名角色回合开始时或你死亡时，你检查存活角色的合法性。若有角色存在非法行为，则你终止本局游戏。",
 
 			boss_xhuanren: "关卡说明",
 			boss_xhuanren_info: "",
-			boss_xhuanren_info_boss: "第一关：挑战秦广王<br>第二关：挑战楚江王，宋帝王，五官王，阎罗王中的一个<br>第三关：挑战卞城王，泰山王，都市王，平等王中的一个<br>第四关：挑战转轮王",
+			boss_xhuanren_info_boss:
+				"第一关：挑战秦广王<br>第二关：挑战楚江王，宋帝王，五官王，阎罗王中的一个<br>第三关：挑战卞城王，泰山王，都市王，平等王中的一个<br>第四关：挑战转轮王",
 
 			boss_newhuanren: "关卡说明",
 			boss_newhuanren_info: "",
-			boss_newhuanren_info_boss: "第一关：挑战秦广王<br>第二关：挑战楚江王，宋帝王，五官王，阎罗王中的一个<br>第三关：挑战卞城王，泰山王，都市王，平等王中的一个<br>第四关：挑战转轮王<br>注：孟婆将在每局前三个阶段随机一个阶段登场<br>地藏王登场规则为，50回合内通过第三关，并且在前三关中成功击杀孟婆。<br>选用的武将越阴间、占比越高，四季映姬登场概率就越大。<li>选陆逊左慈张春华于吉蒋费孔融自动变孙笨",
+			boss_newhuanren_info_boss:
+				"第一关：挑战秦广王<br>第二关：挑战楚江王，宋帝王，五官王，阎罗王中的一个<br>第三关：挑战卞城王，泰山王，都市王，平等王中的一个<br>第四关：挑战转轮王<br>注：孟婆将在每局前三个阶段随机一个阶段登场<br>地藏王登场规则为，50回合内通过第三关，并且在前三关中成功击杀孟婆。<li>选陆逊左慈张春华于吉蒋费孔融自动变孙笨",
 			lingsheji: "灵蛇髻",
 			lingsheji2: "灵蛇髻",
 			shanrangzhaoshu: "禅让诏书",
@@ -10334,90 +10534,35 @@ export default () => {
 			noda_axe2: "刑天破军斧",
 			jinwuluorigong: "金乌落日弓",
 			iwasawa_crowbow: "金乌落日弓",
-			lingsheji_info: "出牌阶段结束时，你可选择：1.摸一张牌。2.将一张牌置于武将牌上，并于回合结束后获得此牌。",
-			shanrangzhaoshu_info: "其他角色于回合外得到牌后，若是其本回合内第一次得到牌，则你可以选择一项：交给其一张牌，或令其交给你一张牌。",
-			xingtianpojunfu_info: "当你于出牌阶段内使用牌指定唯一目标后，你可弃置两张牌。若如此做，其本回合内不能使用或打出牌且其防具技能无效。",
-			jinwuluorigong_info: "当你于出牌阶段内一次性失去了两张以上的手牌后，你可以弃置一名其他角色等量的牌。",
+			lingsheji_info:
+				"出牌阶段结束时，你可选择：1.摸一张牌。2.将一张武将牌置于武将牌上，并于回合结束后获得此牌。",
+			shanrangzhaoshu_info:
+				"其他角色于回合外得到牌后，若是其本回合内第一次得到牌，则你可以选择一项：交给其一张牌，或令其交给你一张牌。",
+			xingtianpojunfu_info:
+				"当你于出牌阶段内使用牌指定唯一目标后，你可弃置两张牌。若如此做，其本回合内不能使用或打出牌且其防具技能无效。",
+			jinwuluorigong_info:
+				"当你于出牌阶段内一次性失去了两张以上的手牌后，你可以弃置一名其他角色等量的牌。",
 			TheDayIBecomeAGod: "神杀",
 			thedayibecomeagod: "传承",
-			thedayibecomeagod_info: "选择一名其他己方角色。若其势力非神，则改为神势力；若其势力为神，则将武将牌翻至正面，回复体力至体力上限，并将手牌摸至5。",
+			thedayibecomeagod_info:
+				"选择一名其他己方角色。若其势力非神，则改为神势力；若其势力为神，则将武将牌翻至正面，回复体力至体力上限，并将手牌摸至5。",
 			gubuzifeng: "故步自封",
 			gubuzifeng_disable: "故步自封",
 			gubuzifeng_info: "出牌阶段，对一名其他角色使用。其的一个随机技能失效直到其下个回合结束。",
 			goujiangdesidai: "篝酱的丝带",
-			goujiangdesidai_info: "锁定技，若你未拥有技能〖纵丝〗，则你视为拥有技能〖纵丝〗；若你拥有技能〖纵丝〗，则你将此技能改为「出牌阶段限两次」。",
+			goujiangdesidai_info:
+				"锁定技，若你未拥有技能〖纵丝〗，则你视为拥有技能〖纵丝〗；若你拥有技能〖纵丝〗，则你将此技能改为「出牌阶段限两次」。",
 			goujiangdesidai_skill: "纵丝",
 			niaobaidaowenha: "鸟白岛文蛤",
 			niaobaidaowenha_skill: "鸟白岛文蛤",
 			niaobaidaowenha_info: "当你减少1点体力上限后，你可令一名其他角色增加1点体力上限并回复1点体力。",
-			niaobaidaowenha_skill_info: "当你减少1点体力上限后，你可令一名其他角色增加1点体力上限并回复1点体力。",
+			niaobaidaowenha_skill_info:
+				"当你减少1点体力上限后，你可令一名其他角色增加1点体力上限并回复1点体力。",
 			shenzhixiunvfu: "神之修女服",
 			shenzhixiunvfu_info: "没什么实际作用的衣服，仅仅是显得像个神而已。",
 
 			mode_boss_card_config: "挑战卡牌",
 			mode_boss_character_config: "挑战武将",
-
-			// 台词部分
-			"#boss_modao": "魔道影阵，助我法力。",
-			"#boss_lunhui": "轮回反复，此法无解。",
-			"#boss_wangsheng": "前生今世，不过皆苦。",
-			"#boss_zlfanshi": "敢忤逆我，你是不知道真正的代价！",
-			"#boss_zhuanlunwang:die": "你居然走到了最后！",
-			"#boss_tiemian": "铁面无私，刚正不阿！",
-			"#boss_zhadao": "铡刀之下，皆是恶徒！",
-			"#boss_zhuxin": "诛人心魄，灭人心智。",
-			"#boss_zhiwang": "罔顾伦常，必受其害！",
-			"#boss_gongzheng": "公正以待，显其威法。",
-			"#boss_xuechi": "炼狱血池，需要你的奉献。",
-			"#boss_wuguanwang:die": "我的法阵，居然被破了！",
-			"#boss_fudu": "服药止血，反被毒伤。",
-			"#boss_kujiu": "此酒虽苦，酒效不减。",
-			"#boss_renao": "惹恼我的代价，你可承受不起！",
-			"#boss_heisheng": "想跑？痴人说梦！",
-			"#boss_shengfu": "此绳索，是你无法逃脱的噩梦。",
-			"#boss_songdiwang_enyuan": "有恩有惠，有伤有报。",
-			"#boss_panguan": "世俗杂事，吾皆可判。",
-			"#boss_juhun": "勾魂索命，拘魄入狱。",
-			"#boss_wangxiang": "还是别望他乡了！",
-			"#boss_suozu": "困其身，锁其足。",
-			"#boss_abi": "阿鼻地狱，雷火皆来。",
-			"#boss_pingdeng": "众生平等，你也难逃此罚！",
-			"#boss_shiyou": "忧愁可拾，烦苦可消。",
-			"#boss_wanghun": "忘情断爱，心魂可劫。",
-			"#boss_wangshi": "红尘往事，再无牵挂。",
-			"#boss_remen": "这燥热，真让人烦闷！",
-			"#boss_zhifen": "焚身燃躯，日炙火烧！",
-			"#boss_huoxing": "火海炼狱，普世之刑！",
-			"#boss_bufo": "地狱未空，誓不成佛。",
-			"#boss_wuliang": "无量劫难，众生度尽。",
-			"#boss_dayuan": "地狱众生，发愿救度。",
-			"#boss_diting": "静虑深密，犹如秘藏。",
-			"#boss_chujiangwang_weimu": "暗涌掩身，查无踪迹。",
-			"#boss_chujiangwang_fankui": "伤我，可是要有付出的！",
-			"#boss_bingfeng": "接受这寒冰的封冻吧！",
-			"#boss_leifu": "想出此阵，不要妄想！",
-			"#boss_leizhou": "术法诅咒，显灵加威。",
-			"#boss_leizhu": "你们皆要受到诛连罪行！",
-			"#xiuluo1": "准备受死吧！",
-			"#xiuluo2": "鼠辈！螳臂当车！",
-			"#shenwei1": "萤烛之火，也敢与日月争辉？",
-			"#shenwei2": "我不会输给任何人！",
-			"#shenji1": "杂鱼们！都去死吧！",
-			"#shenji2": "竟想赢我？痴人说梦！",
-			"#boss_lvbu2:die": "虎牢关，失守了……",
-			"#shenqu1": "别心怀侥幸了，你们不可能赢！",
-			"#shenqu2": "虎牢关，我一人镇守足矣！",
-			"#jiwu1": "我，是不可战胜的！",
-			"#jiwu2": "今天，就让你们感受一下真正的绝望！",
-			"#qiangxi_boss_lvbu31": "这么想死，那我就成全你！",
-			"#qiangxi_boss_lvbu32": "项上人头，待我来取！",
-			"#retieji_boss_lvbu31": "哈哈哈，破绽百出！",
-			"#retieji_boss_lvbu32": "我要让这虎牢关下，血流成河！",
-			"#xuanfeng_boss_lvbu31": "千钧之势，力贯苍穹！",
-			"#xuanfeng_boss_lvbu32": "横扫六合，威震八荒！",
-			"#wansha_boss_lvbu31": "蝼蚁，怎容偷生？",
-			"#wansha_boss_lvbu32": "沉沦吧，在这无边的恐惧！",
-			"#boss_lvbu3:die": "你们的项上人头，我改日再取！",
 		},
 		get: {
 			rawAttitude: function (from, to) {
@@ -10426,4 +10571,4 @@ export default () => {
 			},
 		},
 	};
-};
+});

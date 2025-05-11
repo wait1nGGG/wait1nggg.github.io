@@ -1,12 +1,8 @@
-import { lib, game, ui, get, ai, _status } from "../noname.js";
-export const type = "mode";
-/**
- * @type { () => importModeConfig }
- */
-export default () => {
+"use strict";
+game.import("mode", function (lib, game, ui, get, ai, _status) {
 	return {
 		name: "realtime",
-		start() {},
+		start: function () {},
 		game: {},
 	};
-};
+});

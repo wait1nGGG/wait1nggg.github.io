@@ -714,7 +714,7 @@ table {
 }
 .touchinfo.right {
 	left: auto;
-	right: 14px;
+	right: 0;
 	text-align: right;
 }
 #window.touchinfohidden > .touchinfo {
@@ -1505,7 +1505,7 @@ div:not(.handcards) > .card > .info > span,
 }
 .buttons.smallzoom {
 	display: block;
-	/* zoom: 0.65; */
+	zoom: 0.65;
 }
 .buttons .card.button > .name {
 	transform: scale(0.8);
@@ -1628,7 +1628,7 @@ div:not(.handcards) > .card > .info > span,
 .mark-container.marks > .card > .background.skillmark,
 .mark-container.marks > .card.fakemark.fullborder > .background {
 	padding-top: calc(17px / 2) !important;
-	/* zoom: 2; */
+	zoom: 2;
 }
 .mark-container.marks > .card.overflowmark {
 	overflow: visible;
@@ -1958,7 +1958,7 @@ div:not(.handcards) > .card > .info > span,
 .skill {
 	left: 0 !important;
 	width: 70px !important;
-	/*-- white-space: nowrap; --*/
+	white-space: nowrap;
 }
 .skilln {
 	left: 0 !important;
@@ -3803,8 +3803,6 @@ div:hover > .intro {
 	background: rgba(0, 0, 0, 0.2);
 	box-shadow: rgba(0, 0, 0, 0.3) 0 0 0 1px;
 	border-radius: 4px;
-	padding-left: 30px;
-	padding-right: 30px;
 }
 
 .tdnode {
@@ -4678,20 +4676,6 @@ div[data-decoration="bronze"]::after {
 .player {
 	top: 47px;
 	left: 14px;
-}
-.cardsetion {
-	left: 1px;
-	width: calc(100% - 2px);
-	color: #fff;
-	text-shadow: 1px 1px black;
-	font-size: 15px;
-	bottom: 9%;
-	text-align: center;
-	z-index: 2;
-	pointer-events: none;
-}
-.card.tempname.tempimage {
-	opacity: 1 !important;
 }
 .card .wunature {
 	top: 74px;

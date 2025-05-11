@@ -1,4 +1,21 @@
-import { menuContainer, popupContainer, updateActive, setUpdateActive, updateActiveCard, setUpdateActiveCard, menux, menuxpages, menuUpdates, openMenu, clickToggle, clickSwitcher, clickContainer, clickMenuItem, createMenu, createConfig } from "../index.js";
+import {
+	menuContainer,
+	popupContainer,
+	updateActive,
+	setUpdateActive,
+	updateActiveCard,
+	setUpdateActiveCard,
+	menux,
+	menuxpages,
+	menuUpdates,
+	openMenu,
+	clickToggle,
+	clickSwitcher,
+	clickContainer,
+	clickMenuItem,
+	createMenu,
+	createConfig,
+} from "../index.js";
 import { ui, game, get, ai, lib, _status } from "../../../../../noname.js";
 
 export const characterPackMenu = function (connectMenu) {
@@ -120,7 +137,12 @@ export const characterPackMenu = function (connectMenu) {
 	var createModeConfig = function (mode, position, position2) {
 		var _info = lib.characterPack[mode];
 		var page = ui.create.div("");
-		var node = ui.create.div(".menubutton.large", lib.translate[mode + "_character_config"], position, clickMode);
+		var node = ui.create.div(
+			".menubutton.large",
+			lib.translate[mode + "_character_config"],
+			position,
+			clickMode
+		);
 		if (node.innerHTML.length >= 5) {
 			node.classList.add("smallfont");
 		}
@@ -133,18 +155,28 @@ export const characterPackMenu = function (connectMenu) {
 			page.node = node;
 			var list = [];
 			var boolAI = true;
+			var alterableSkills = [];
+			var alterableCharacters = [];
+			var charactersToAlter = [];
 			for (var i in _info) {
-				const characterInfo = _info[i];
-				if (characterInfo.isUnseen) continue;
+				if (_info[i][4] && _info[i][4].includes("unseen")) continue;
 				if (connectMenu && lib.connectBanned.includes(i)) continue;
 				list.push(i);
 				if (boolAI && !lib.config.forbidai_user.includes(i)) boolAI = false;
-				for (var j = 0; j < characterInfo.skills.length; j++) {
-					if (!lib.skill[characterInfo.skills[j]]) {
+				for (var j = 0; j < _info[i][3].length; j++) {
+					if (!lib.skill[_info[i][3][j]]) {
 						continue;
+					}
+					if (lib.skill[_info[i][3][j]].alter) {
+						alterableSkills.add(_info[i][3][j]);
+						alterableCharacters.add(i);
+						if (lib.config.vintageSkills.includes(_info[i][3][j])) {
+							charactersToAlter.add(i);
+						}
 					}
 				}
 			}
+			alterableCharacters.sort();
 			list.sort(lib.sort.character);
 			var list2 = list.slice(0);
 			var cfgnode = createConfig({
@@ -163,7 +195,9 @@ export const characterPackMenu = function (connectMenu) {
 					}
 					// 原逻辑
 					else {
-						return connectMenu ? !lib.config.connect_characters.includes(mode) : lib.config.characters.includes(mode);
+						return connectMenu
+							? !lib.config.connect_characters.includes(mode)
+							: lib.config.characters.includes(mode);
 					}
 				})(),
 				onclick: togglePack,
@@ -190,12 +224,41 @@ export const characterPackMenu = function (connectMenu) {
 				cfgnodeAI.style.marginTop = "0px";
 				page.appendChild(cfgnode);
 				page.appendChild(cfgnodeAI);
+				if (alterableCharacters.length) {
+					var cfgnode2 = createConfig({
+						name: "新版替换",
+						_name: mode,
+						init: charactersToAlter.length == 0,
+						intro: "以下武将将被修改：" + get.translation(alterableCharacters),
+						onclick(bool) {
+							if (bool) {
+								for (var i = 0; i < alterableSkills.length; i++) {
+									lib.config.vintageSkills.remove(alterableSkills[i]);
+									lib.translate[alterableSkills[i] + "_info"] =
+										lib.translate[alterableSkills[i] + "_info_alter"];
+								}
+							} else {
+								for (var i = 0; i < alterableSkills.length; i++) {
+									lib.config.vintageSkills.add(alterableSkills[i]);
+									lib.translate[alterableSkills[i] + "_info"] =
+										lib.translate[alterableSkills[i] + "_info_origin"];
+								}
+							}
+							game.saveConfig("vintageSkills", lib.config.vintageSkills);
+						},
+					});
+					cfgnode2.style.marginTop = "0px";
+					page.appendChild(cfgnode2);
+				}
 			} else if (mode.startsWith("mode_extension")) {
 				// 排除4个基本扩展
+				// 再排除那个boss扩展的间隔包
 				// 给扩展的武将包加一个开启关闭的功能
-				if (!lib.config.all.stockextension.includes(mode.slice(15))) {
+				if (
+					!lib.config.all.stockextension.includes(mode.slice(15)) &&
+					mode != "mode_extension_jiange"
+				) {
 					page.appendChild(cfgnode);
-					cfgnodeAI.style.marginTop = "0px";
 				}
 				page.appendChild(cfgnodeAI);
 			} else {
@@ -206,7 +269,12 @@ export const characterPackMenu = function (connectMenu) {
 					_status.clicked = false;
 					return;
 				}
-				if (mode.startsWith("mode_") && !mode.startsWith("mode_extension_") && mode != "mode_favourite" && mode != "mode_banned") {
+				if (
+					mode.startsWith("mode_") &&
+					!mode.startsWith("mode_extension_") &&
+					mode != "mode_favourite" &&
+					mode != "mode_banned"
+				) {
 					if (!connectMenu && lib.config.show_charactercard) {
 						ui.click.charactercard(this.link, this, mode == "mode_guozhan" ? "guozhan" : true);
 					}
@@ -262,7 +330,6 @@ export const characterPackMenu = function (connectMenu) {
 					if (listx.length) {
 						var cfgnodeY = {
 							name: lib.translate[pak],
-							intro: lib.translate[pak + "_info"] || false,
 							_name: pak,
 							init: boolx,
 							onclick(bool) {
@@ -284,11 +351,20 @@ export const characterPackMenu = function (connectMenu) {
 										banned.add(listx[i]);
 									}
 								}
-								game.saveConfig(connectMenu ? "connect_" + modex.mode + "_banned" : get.mode() + "_banned", banned);
+								game.saveConfig(
+									connectMenu
+										? "connect_" + modex.mode + "_banned"
+										: get.mode() + "_banned",
+									banned
+								);
 								updateActive();
 							},
 						};
-						if (mode.startsWith("mode_") && !mode.startsWith("mode_extension_") && !mode.startsWith("mode_guozhan")) {
+						if (
+							mode.startsWith("mode_") &&
+							!mode.startsWith("mode_extension_") &&
+							!mode.startsWith("mode_guozhan")
+						) {
 							cfgnodeY.clear = true;
 							delete cfgnodeY.onclick;
 						}
@@ -343,11 +419,21 @@ export const characterPackMenu = function (connectMenu) {
 			page.classList.add("leftbutton");
 			if (!connectMenu) {
 				if (lib.config.all.sgscharacters.includes(mode)) {
-					ui.create.div(".config.pointerspan", '<span style="opacity:0.5">该武将包不可被隐藏</span>', page);
+					ui.create.div(
+						".config.pointerspan",
+						'<span style="opacity:0.5">该武将包不可被隐藏</span>',
+						page
+					);
 				} else if (!mode.startsWith("mode_")) {
 					ui.create.div(".config.pointerspan", "<span>隐藏武将包</span>", page, function () {
 						if (this.firstChild.innerHTML == "隐藏武将包") {
-							if (confirm("真的要隐藏“" + get.translation(mode + "_character_config") + "”武将包吗？\n建议使用“关闭”而不是“隐藏”功能，否则将会影响其他相关武将包的正常运行！")) {
+							if (
+								confirm(
+									"真的要隐藏“" +
+										get.translation(mode + "_character_config") +
+										"”武将包吗？\n建议使用“关闭”而不是“隐藏”功能，否则将会影响其他相关武将包的正常运行！"
+								)
+							) {
 								this.firstChild.innerHTML = "武将包将在重启后隐藏";
 								lib.config.hiddenCharacterPack.add(mode);
 								if (!lib.config.prompt_hidepack) {
@@ -406,7 +492,7 @@ export const characterPackMenu = function (connectMenu) {
 		createModeConfig(characterlist[i], start.firstChild);
 	}
 	if (!connectMenu)
-		Object.keys(lib.characterPack).forEach(key => {
+		Object.keys(lib.characterPack).forEach((key) => {
 			// 单机模式下显示不在lib.config.all.characters里的武将包
 			if (!characterlist.includes(key)) createModeConfig(key, start.firstChild);
 			if (connectMenu) lib.connectCharacterPack.add(key);
@@ -449,7 +535,7 @@ export const characterPackMenu = function (connectMenu) {
 	 */
 	return function (packName) {
 		// 判断菜单栏有没有加载过这个武将包
-		if ([...start.firstChild.children].map(node => node.mode).includes(packName)) return;
+		if ([...start.firstChild.children].map((node) => node.mode).includes(packName)) return;
 		// 显示不是无名杀自带的武将包
 		if (!lib.connectCharacterPack.includes(packName) && !lib.config.all.characters.includes(packName)) {
 			createModeConfig(packName, start.firstChild, node1);

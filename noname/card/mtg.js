@@ -6,11 +6,11 @@ game.import("card", function () {
 			mtg_lindixiliu: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_lindixiliu", player);
 					var card = get.cardPile2(function (card) {
@@ -25,7 +25,10 @@ game.import("card", function () {
 						.set("ai", function (card) {
 							return 8 - get.value(card);
 						})
-						.set("prompt2", "弃置任意张红桃牌，每弃置一张牌，将一张延时锦囊牌置入一名随机敌方角色的判定区");
+						.set(
+							"prompt2",
+							"弃置任意张红桃牌，每弃置一张牌，将一张延时锦囊牌置入一名随机敌方角色的判定区"
+						);
 					"step 2";
 					if (result.bool) {
 						event.num = result.cards.length;
@@ -65,11 +68,11 @@ game.import("card", function () {
 			mtg_longlushanfeng: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_longlushanfeng", player);
 					player
@@ -77,7 +80,7 @@ game.import("card", function () {
 						.set("prompt", "选择一项")
 						.set("ai", function () {
 							var player = _status.event.player;
-							if (player.hasShan("all")) return 0;
+							if (player.hasShan()) return 0;
 							return 1;
 						});
 					"step 1";
@@ -99,12 +102,12 @@ game.import("card", function () {
 			mtg_cangbaohaiwan: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					if (!lib.cardPack.mode_derivation || !lib.cardPack.mode_derivation.length) return false;
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_cangbaohaiwan", player);
 					event.map = {};
@@ -161,11 +164,11 @@ game.import("card", function () {
 			mtg_linzhongjianta: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_linzhongjianta", player);
 					player.discoverCard(
@@ -185,7 +188,7 @@ game.import("card", function () {
 					useful: 3,
 					order: 9,
 					result: {
-						player(player) {
+						player: function (player) {
 							if (player.getEquip(1)) return 0;
 							return 1;
 						},
@@ -195,11 +198,11 @@ game.import("card", function () {
 			mtg_youlin: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					game.changeLand("mtg_youlin", player);
 					var list = get.inpile("trick");
 					while (list.length) {
@@ -208,7 +211,10 @@ game.import("card", function () {
 						var targets = game.filterPlayer();
 						while (targets.length) {
 							var target = targets.randomRemove();
-							if (player.canUse(name, target, false) && get.effect(target, { name: name }, player, player) > 0) {
+							if (
+								player.canUse(name, target, false) &&
+								get.effect(target, { name: name }, player, player) > 0
+							) {
 								player.useCard({ name: name }, target);
 								return;
 							}
@@ -227,11 +233,11 @@ game.import("card", function () {
 			mtg_haidao: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_haidao", player);
 					if (player.isHealthy()) {
@@ -267,11 +273,11 @@ game.import("card", function () {
 			mtg_yixialan: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_yixialan", player);
 					player
@@ -279,7 +285,7 @@ game.import("card", function () {
 						.set("prompt", "选择一个类型获得该类型的一张牌")
 						.set("ai", function () {
 							var player = _status.event.player;
-							if (!player.hasSha("all") || !player.hasShan("all") || player.hp == 1) return 0;
+							if (!player.hasSha() || !player.hasShan() || player.hp == 1) return 0;
 							return 1;
 						});
 					"step 1";
@@ -301,11 +307,11 @@ game.import("card", function () {
 			mtg_shuimomuxue: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_shuimomuxue", player);
 					if (player.countDiscardableCards("he")) {
@@ -325,7 +331,7 @@ game.import("card", function () {
 					useful: 3,
 					order: 4,
 					result: {
-						player(player) {
+						player: function (player) {
 							if (
 								!player.countCards("h", function (card) {
 									return card.name != "mtg_shuimomuxue" && get.value(card) < 8;
@@ -341,11 +347,11 @@ game.import("card", function () {
 			mtg_feixu: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					game.changeLand("mtg_feixu", player);
 					player.discoverCard(ui.discardPile.childNodes);
 				},
@@ -361,11 +367,11 @@ game.import("card", function () {
 			mtg_shamolvzhou: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					game.changeLand("mtg_shamolvzhou", player);
 					player.discoverCard(get.inpile("basic"));
 				},
@@ -381,11 +387,11 @@ game.import("card", function () {
 			mtg_duzhao: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_duzhao", player);
 					player.chooseTarget("选择一名角色令其获得一张毒", true).set("ai", function (target) {
@@ -404,7 +410,7 @@ game.import("card", function () {
 					useful: 3,
 					order: 4,
 					result: {
-						player(player) {
+						player: function (player) {
 							if (
 								game.countPlayer(function (current) {
 									if (current.hasSkillTag("nodu")) return false;
@@ -425,11 +431,11 @@ game.import("card", function () {
 			mtg_bingheyaosai: {
 				type: "land",
 				fullborder: "wood",
-				enable(card, player) {
+				enable: function (card, player) {
 					return !player.hasSkill("land_used");
 				},
 				notarget: true,
-				content() {
+				content: function () {
 					"step 0";
 					game.changeLand("mtg_bingheyaosai", player);
 					player.draw(2);
@@ -450,12 +456,12 @@ game.import("card", function () {
 			mtg_bingheyaosai_skill: {
 				trigger: { player: "useCard" },
 				forced: true,
-				filter(event, player) {
+				filter: function (event, player) {
 					if (player.countCards("he") == 0) return false;
 					return event.card.name == "sha";
 				},
 				autodelay: true,
-				content() {
+				content: function () {
 					player.chooseToDiscard(true, "he");
 				},
 				ai: {
@@ -465,7 +471,7 @@ game.import("card", function () {
 			mtg_duzhao_skill: {
 				trigger: { player: "phaseEnd" },
 				forced: true,
-				content() {
+				content: function () {
 					player.gain(game.createCard("du"), "gain2");
 				},
 				ai: {
@@ -474,7 +480,7 @@ game.import("card", function () {
 			},
 			mtg_shamolvzhou_skill: {
 				mod: {
-					ignoredHandcard(card) {
+					ignoredHandcard: function (card) {
 						if (get.type(card) == "basic") {
 							return true;
 						}
@@ -487,10 +493,10 @@ game.import("card", function () {
 			mtg_haidao_skill: {
 				trigger: { player: "changeHujiaBefore" },
 				forced: true,
-				filter(event, player) {
+				filter: function (event, player) {
 					return player.isDamaged() && !player._temp_mtg_haidao && event.num > 0;
 				},
-				content() {
+				content: function () {
 					player.recover(trigger.num);
 					trigger.cancel();
 				},
@@ -500,23 +506,25 @@ game.import("card", function () {
 			},
 			mtg_yixialan_skill: {
 				enable: "phaseUse",
-				filter: (event, player) => player.hasCard(card => lib.skill.mtg_yixialan_skill.filterCard(card, player), "h"),
+				filter: (event, player) =>
+					player.hasCard((card) => lib.skill.mtg_yixialan_skill.filterCard(card, player), "h"),
 				filterCard: (card, player) => get.type(card) == "basic" && player.canRecast(card),
 				discard: false,
 				lose: false,
-				check(card) {
+				check: function (card) {
 					return 7 - get.value(card);
 				},
 				usable: 1,
-				content() {
-					player.recast(cards, void 0, (player, cards) => {
+				content: function () {
+					player.recast(cards, null, (player, cards) => {
 						var cardsToGain = [];
 						for (var repetition = 0; repetition < cards.length; repetition++) {
-							var card = get.cardPile(card => get.type(card, "trick") == "trick");
+							var card = get.cardPile((card) => get.type(card, "trick") == "trick");
 							if (card) cardsToGain.push(card);
 						}
 						if (cardsToGain.length) player.gain(cardsToGain, "draw");
-						if (cards.length - cardsToGain.length) player.draw(cards.length - cardsToGain.length).log = false;
+						if (cards.length - cardsToGain.length)
+							player.draw(cards.length - cardsToGain.length).log = false;
 					});
 				},
 				ai: {
@@ -529,16 +537,16 @@ game.import("card", function () {
 			},
 			mtg_shuimomuxue_skill: {
 				mod: {
-					maxHandcard(player, num) {
+					maxHandcard: function (player, num) {
 						return num - 1;
 					},
 				},
 				trigger: { player: "phaseDiscardEnd" },
 				forced: true,
-				filter(event) {
+				filter: function (event) {
 					return event.cards && event.cards.length > 0;
 				},
-				content() {
+				content: function () {
 					player.draw();
 				},
 				ai: {
@@ -548,7 +556,7 @@ game.import("card", function () {
 			mtg_feixu_skill: {
 				trigger: { player: "phaseBegin" },
 				silent: true,
-				content() {
+				content: function () {
 					var num = ui.discardPile.childNodes.length;
 					if (num) {
 						var card = ui.discardPile.childNodes[get.rand(num)];
@@ -564,16 +572,16 @@ game.import("card", function () {
 			mtg_youlin_skill: {
 				enable: "phaseUse",
 				usable: 1,
-				filter(event, player) {
+				filter: function (event, player) {
 					return player.countCards("h", { type: ["trick", "delay"] });
 				},
-				filterCard(card) {
+				filterCard: function (card) {
 					return get.type(card, "trick") == "trick";
 				},
-				check(card) {
+				check: function (card) {
 					return 7 - get.value(card);
 				},
-				content() {
+				content: function () {
 					player.discoverCard();
 				},
 				ai: {
@@ -586,26 +594,26 @@ game.import("card", function () {
 			},
 			mtg_linzhongjianta_skill: {
 				enable: "chooseToUse",
-				filterCard(card) {
+				filterCard: function (card) {
 					return get.type(card) == "basic";
 				},
 				usable: 1,
 				viewAs: { name: "sha" },
-				viewAsFilter(player) {
+				viewAsFilter: function (player) {
 					if (!player.getEquip(1)) return false;
 					if (!player.countCards("h", { type: "basic" })) return false;
 				},
 				prompt: "将一张基本牌当杀使用",
-				check(card) {
+				check: function (card) {
 					return 6 - get.value(card);
 				},
 				ai: {
 					mapValue: 2,
 					respondSha: true,
-					order() {
+					order: function () {
 						return get.order({ name: "sha" }) - 0.1;
 					},
-					skillTagFilter(player, tag, arg) {
+					skillTagFilter: function (player, tag, arg) {
 						if (arg != "use") return false;
 						if (!player.getEquip(1)) return false;
 						if (!player.countCards("h", { type: "basic" })) return false;
@@ -615,7 +623,7 @@ game.import("card", function () {
 			mtg_cangbaohaiwan_skill: {
 				trigger: { player: "drawBegin" },
 				silent: true,
-				content() {
+				content: function () {
 					if (Math.random() < 1 / 3) {
 						var list = [];
 						for (var i = 0; i < lib.cardPack.mode_derivation.length; i++) {
@@ -625,7 +633,10 @@ game.import("card", function () {
 							list.push(name);
 						}
 						if (list.length) {
-							ui.cardPile.insertBefore(game.createCard(list.randomGet()), ui.cardPile.firstChild);
+							ui.cardPile.insertBefore(
+								game.createCard(list.randomGet()),
+								ui.cardPile.firstChild
+							);
 						}
 					}
 				},
@@ -635,7 +646,7 @@ game.import("card", function () {
 			},
 			mtg_longlushanfeng_skill: {
 				mod: {
-					cardUsable(card, player, num) {
+					cardUsable: function (card, player, num) {
 						if (card.name == "sha") return num + 1;
 					},
 				},
@@ -646,10 +657,10 @@ game.import("card", function () {
 			mtg_lindixiliu_skill: {
 				trigger: { player: "phaseBegin" },
 				direct: true,
-				filter(event, player) {
+				filter: function (event, player) {
 					return player.countCards("he", { suit: "heart" }) && player.countCards("j");
 				},
-				content() {
+				content: function () {
 					"step 0";
 					player
 						.chooseToDiscard("he", { suit: "heart" }, get.prompt2("mtg_lindixiliu_skill"))
@@ -674,23 +685,28 @@ game.import("card", function () {
 			land: "地图",
 			mtg_yixialan: "依夏兰",
 			mtg_yixialan_skill: "依夏兰",
-			mtg_yixialan_info: "选项一：随机获得一张基本牌；选项二：随机获得一张锦囊牌。地图效果：出牌阶段限一次，你可以将一张基本牌重铸为锦囊牌。",
+			mtg_yixialan_info:
+				"选项一：随机获得一张基本牌；选项二：随机获得一张锦囊牌。地图效果：出牌阶段限一次，你可以将一张基本牌重铸为锦囊牌。",
 			mtg_yixialan_skill_info: "出牌阶段限一次，你可以将一张基本牌重铸为锦囊牌。",
 			mtg_shuimomuxue: "水没墓穴",
 			mtg_shuimomuxue_skill: "水没墓穴",
-			mtg_shuimomuxue_info: "你可以弃置一张牌并摸两张牌。地图效果：锁定技，你的手牌上限-1；若弃牌阶段弃置了至少一张牌，则在此阶段结束时摸一张牌。",
-			mtg_shuimomuxue_skill_info: "锁定技，你的手牌上限-1；若弃牌阶段弃置了至少一张牌，则在此阶段结束时摸一张牌。",
+			mtg_shuimomuxue_info:
+				"你可以弃置一张牌并摸两张牌。地图效果：锁定技，你的手牌上限-1；若弃牌阶段弃置了至少一张牌，则在此阶段结束时摸一张牌。",
+			mtg_shuimomuxue_skill_info:
+				"锁定技，你的手牌上限-1；若弃牌阶段弃置了至少一张牌，则在此阶段结束时摸一张牌。",
 			mtg_feixu: "废墟",
 			mtg_feixu_skill: "废墟",
 			mtg_feixu_info: "从弃牌堆中发现一张牌。地图效果：准备阶段，随机将弃牌堆的一张牌置于牌堆顶。",
 			mtg_feixu_skill_info: "准备阶段，随机将弃牌堆的一张牌置于牌堆顶。",
 			mtg_haidao: "海岛",
 			mtg_haidao_skill: "海岛",
-			mtg_haidao_info: "选项一：获得1点护甲（无视地图效果）；选项二：弃置一张牌并回复1点体力。地图效果：锁定技，当你获得护甲时，若你已受伤，改为回复等量体力。",
+			mtg_haidao_info:
+				"选项一：获得1点护甲（无视地图效果）；选项二：弃置一张牌并回复1点体力。地图效果：锁定技，当你获得护甲时，若你已受伤，改为回复等量体力。",
 			mtg_haidao_skill_info: "锁定技，当你获得护甲时，若你已受伤，改为回复等量体力。",
 			mtg_youlin: "幽林",
 			mtg_youlin_skill: "幽林",
-			mtg_youlin_info: "随机使用一张普通锦囊牌，随机指定一个具有正收益的目标。地图效果：出牌阶段限一次，你可以弃置一张锦囊牌并发现一张牌。",
+			mtg_youlin_info:
+				"随机使用一张普通锦囊牌，随机指定一个具有正收益的目标。地图效果：出牌阶段限一次，你可以弃置一张锦囊牌并发现一张牌。",
 			mtg_youlin_skill_info: "出牌阶段限一次，你可以弃置一张锦囊牌并发现一张牌。",
 			mtg_shamolvzhou: "沙漠绿洲",
 			mtg_shamolvzhou_skill: "沙漠绿洲",
@@ -703,11 +719,13 @@ game.import("card", function () {
 			mtg_duzhao_skill_info: "结束阶段，你获得一张毒。",
 			mtg_linzhongjianta: "林中尖塔",
 			mtg_linzhongjianta_skill: "林中尖塔",
-			mtg_linzhongjianta_info: "发现一张武器牌并装备之。地图效果：若你装备区内有武器牌，你可以将一张基本牌当作杀使用。",
+			mtg_linzhongjianta_info:
+				"发现一张武器牌并装备之。地图效果：若你装备区内有武器牌，你可以将一张基本牌当作杀使用。",
 			mtg_linzhongjianta_skill_info: "若你装备区内有武器牌，你可以将一张基本牌当作杀使用。",
 			mtg_cangbaohaiwan: "藏宝海湾",
 			mtg_cangbaohaiwan_skill: "藏宝海湾",
-			mtg_cangbaohaiwan_info: "选择一个扩展包，随机获得来自该扩展包的一张衍生牌。地图效果：你在摸牌时有可能摸到衍生牌。",
+			mtg_cangbaohaiwan_info:
+				"选择一个扩展包，随机获得来自该扩展包的一张衍生牌。地图效果：你在摸牌时有可能摸到衍生牌。",
 			mtg_cangbaohaiwan_skill_info: "你在摸牌时有可能摸到衍生牌。",
 			mtg_longlushanfeng: "龙颅山峰",
 			mtg_longlushanfeng_skill: "龙颅山峰",
@@ -715,15 +733,21 @@ game.import("card", function () {
 			mtg_longlushanfeng_skill_info: "你出杀的次数上限+1。",
 			mtg_bingheyaosai: "冰河要塞",
 			mtg_bingheyaosai_skill: "冰河要塞",
-			mtg_bingheyaosai_info: "摸两张牌，然后弃置两张牌。地图效果：锁定技，每当你使用一张杀，若你有牌，则需弃置一张牌。",
+			mtg_bingheyaosai_info:
+				"摸两张牌，然后弃置两张牌。地图效果：锁定技，每当你使用一张杀，若你有牌，则需弃置一张牌。",
 			mtg_bingheyaosai_skill_info: "锁定技，每当你使用一张杀，若你有牌，则需弃置一张牌。",
 			mtg_lindixiliu: "林地溪流",
 			mtg_lindixiliu_skill: "林地溪流",
-			mtg_lindixiliu_info: "从牌堆中摸一张红桃牌，然后弃置任意张红桃牌，每弃置一张牌，将一张延时锦囊牌置入一名随机敌方角色的判定区。地图效果：准备阶段，你可以弃置一张红桃牌，然后弃置判定区内的一张牌。",
+			mtg_lindixiliu_info:
+				"从牌堆中摸一张红桃牌，然后弃置任意张红桃牌，每弃置一张牌，将一张延时锦囊牌置入一名随机敌方角色的判定区。地图效果：准备阶段，你可以弃置一张红桃牌，然后弃置判定区内的一张牌。",
 			mtg_lindixiliu_skill_info: "准备阶段，你可以弃置一张红桃牌，然后弃置判定区内的一张牌。",
 		},
 		help: {
-			万智牌: "<ul><li>地图牌可于出牌阶段使用，每阶段最多使用一张地图牌<li>" + "地图牌分为两部分：即时效果以及地图效果，即时效果由使用者在使用时选择；地图效果对所有角色有效<li>" + "当使用者死亡或下个回合开始时，当前地图效果消失<li>" + "新地图被使用时会覆盖当前地图效果",
+			万智牌:
+				"<ul><li>地图牌可于出牌阶段使用，每阶段最多使用一张地图牌<li>" +
+				"地图牌分为两部分：即时效果以及地图效果，即时效果由使用者在使用时选择；地图效果对所有角色有效<li>" +
+				"当使用者死亡或下个回合开始时，当前地图效果消失<li>" +
+				"新地图被使用时会覆盖当前地图效果",
 		},
 		list: [
 			["club", 12, "mtg_yixialan"],

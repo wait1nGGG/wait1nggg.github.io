@@ -1,7 +1,6 @@
 import { get } from "../../get/index.js";
 import { lib } from "../index.js";
 import { _status } from "../../status/index.js";
-import { ai } from "../../ai/index.js";
 
 export class VCard {
 	/**
@@ -9,9 +8,8 @@ export class VCard {
 	 * @param { number | Card[] } [numberOrCards]
 	 * @param { string } [name]
 	 * @param { string } [nature]
-	 * @param { Player | false } [owner]
 	 */
-	constructor(suitOrCard, numberOrCards, name, nature, owner) {
+	constructor(suitOrCard, numberOrCards, name, nature) {
 		if (Array.isArray(suitOrCard)) {
 			/**
 			 * @type {string}
@@ -32,11 +30,11 @@ export class VCard {
 		}
 		// @ts-ignore
 		else if (get.itemtype(suitOrCard) == "card") {
-			this.name = get.name(suitOrCard, owner);
-			this.suit = get.suit(suitOrCard, owner);
-			this.color = get.color(suitOrCard, owner);
-			this.number = get.number(suitOrCard, owner);
-			this.nature = get.nature(suitOrCard, owner);
+			this.name = get.name(suitOrCard);
+			this.suit = get.suit(suitOrCard);
+			this.color = get.color(suitOrCard);
+			this.number = get.number(suitOrCard);
+			this.nature = get.nature(suitOrCard);
 			/**
 			 * @type { boolean }
 			 */
@@ -72,10 +70,10 @@ export class VCard {
 				 */
 				this.cards = numberOrCards.slice();
 				if (noCards) {
-					if (!lib.suits.includes(this.suit)) this.suit = get.suit(this, owner);
-					if (!Object.keys(lib.color).includes(this.color)) this.color = get.color(this, owner);
-					if (typeof this.number != "number") this.number = get.number(this, owner);
-					if (!this.nature) this.nature = get.nature(this, owner);
+					if (!lib.suits.includes(this.suit)) this.suit = get.suit(this);
+					if (!Object.keys(lib.color).includes(this.color)) this.color = get.color(this);
+					if (typeof this.number != "number") this.number = get.number(this);
+					if (!this.nature) this.nature = get.nature(this);
 				}
 			} else if (numberOrCards === "unsure" && !this.isCard) {
 				if (!this.suit) this.suit = "unsure";
@@ -122,34 +120,12 @@ export class VCard {
 		if (nature == "linked") return natures.some((n) => lib.linked.includes(n));
 		return get.is.sameNature(natures, nature);
 	}
-	/**
-	 * 返回一个键值，用于在缓存中作为键名。
-	 * @param { boolean } [similar] true伪equals, false统一前缀
-	 * @returns {string} cacheKey
-	 */
-	getCacheKey(similar) {
-		let prefix = "[object:";
-		if (similar !== false) prefix = similar ? "[card:" : "[vcard:";
-		if (this.cardid) return prefix + this.cardid + "]";
-		if (!this.cards.length) return prefix + `${this.name}+${
-			this.suit ? this.suit : (this.color || "none")
-		}+${
+	getCacheKey() {
+		return `[vc:${this.name}+${this.suit ? this.suit : "none"}+${
 			this.number === undefined ? "none" : this.number
-		}${
-			this.nature ? "+" + this.nature : ""
-		}]`;
-		if (similar !== undefined && this.cards.length === 1) return ai.getCacheKey(this.cards[0], similar);
-		return prefix + "[array:[" + this.cards.map(i => {
-			return ai.getCacheKey(i, similar);
-		}).join("-") + "]]]";
+		}${this.nature ? "+" : ""}${this.nature ? this.nature : ""}]`;
 	}
 	hasGaintag(tag) {
 		return this.gaintag && this.gaintag.includes(tag);
-	}
-	initID() {
-		if (!this.vcardID){
-			this.vcardID = get.id();
-			if (lib.vcardOL) lib.vcardOL[this.vcardID] = this;
-		}
 	}
 }

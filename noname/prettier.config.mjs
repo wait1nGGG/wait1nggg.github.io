@@ -1,9 +1,9 @@
 /** @type {import("prettier").Config} */
 export default {
-	arrowParens: "avoid",
+	arrowParens: "always",
 	bracketSpacing: true,
 	endOfLine: "lf",
-	printWidth: 999,
+	printWidth: 110,
 	proseWrap: "preserve",
 	quoteProps: "as-needed",
 	semi: true,

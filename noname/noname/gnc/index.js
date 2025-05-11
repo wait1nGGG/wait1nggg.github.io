@@ -4,9 +4,8 @@ import { Is } from "./is.js";
 // gnc: GeNCoroutine
 export class GNC {
 	/**
-	 * @template {GeneratorFunction} T
-	 * @param {T} fn
-	 * @returns { (...args: Parameters<T>) => Promise<ReturnType<T>> }
+	 * @param {GeneratorFunction} fn
+	 * @returns
 	 */
 	of(fn) {
 		/**

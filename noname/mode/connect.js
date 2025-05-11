@@ -1,12 +1,8 @@
-import { lib, game, ui, get, ai, _status } from "../noname.js";
-export const type = "mode";
-/**
- * @type { () => importModeConfig }
- */
-export default () => {
+"use strict";
+game.import("mode", function (lib, game, ui, get, ai, _status) {
 	return {
 		name: "connect",
-		start() {
+		start: function () {
 			var directstartmode = lib.config.directstartmode;
 			ui.create.menu(true);
 			event.textnode = ui.create.div("", "输入联机地址");
@@ -38,13 +34,13 @@ export default () => {
 
 				event.created = true;
 				var node = ui.create.div(".shadowed");
-				node.style.width = "400px";
+				node.style.width = "600px";
 				node.style.height = "30px";
 				node.style.lineHeight = "30px";
 				node.style.fontFamily = "xinwei";
 				node.style.fontSize = "30px";
 				node.style.padding = "10px";
-				node.style.left = "calc(50% - 210px)";
+				node.style.left = "calc(50% - 300px)";
 				node.style.top = "calc(50% - 20px)";
 				node.style.whiteSpace = "nowrap";
 				node.textContent = lib.config.last_ip || lib.hallURL;
@@ -53,15 +49,20 @@ export default () => {
 				node.style.textAlign = "center";
 				node.style.overflow = "hidden";
 
+				// paste as plain text
+				node.addEventListener('paste', function (e) {
+					e.preventDefault()
+					var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+					document.execCommand("insertHTML", false, text);
+				});
+
 				var connect = function (e) {
 					event.textnode.textContent = "正在连接...";
 					clearTimeout(event.timeout);
 					if (e) e.preventDefault();
-					const ip = node.textContent;
-					game.saveConfig("last_ip", ip);
-					game.connect(ip, function (success) {
+					game.saveConfig("last_ip", node.textContent);
+					game.connect(node.textContent, function (success) {
 						if (success) {
-							game.requireSandboxOn(ip);
 							var info = lib.config.reconnect_info;
 							if (info && info[0] == _status.ip) {
 								game.onlineID = info[1];
@@ -129,7 +130,9 @@ export default () => {
 						});
 						var list = ui.create.div(".caption");
 						for (var i = 0; i < lib.config.recentIP.length; i++) {
-							ui.create.div(".text.textlink", list, clickLink).textContent = get.trimip(lib.config.recentIP[i]);
+							ui.create.div(".text.textlink", list, clickLink).textContent = get.trimip(
+								lib.config.recentIP[i]
+							);
 						}
 						uiintro.add(list);
 						var clear = uiintro.add('<div class="text center">清除</div>');
@@ -146,11 +149,15 @@ export default () => {
 				);
 				if (get.config("read_clipboard", "connect")) {
 					var ced = false;
-					var read = text => {
+					var read = (text) => {
 						try {
 							var text2 = text.split("\n")[2];
 							var ip = text2.slice(5);
-							if (ip.length > 0 && text2.startsWith("联机地址:") && (ced || confirm("是否根据剪贴板的邀请链接以进入联机地址和房间？"))) {
+							if (
+								ip.length > 0 &&
+								text2.startsWith("联机地址:") &&
+								(ced || confirm("是否根据剪贴板的邀请链接以进入联机地址和房间？"))
+							) {
 								node.innerHTML = ip;
 								event.textnode.innerHTML = "正在连接...";
 								clearTimeout(event.timeout);
@@ -172,7 +179,7 @@ export default () => {
 						navigator.clipboard
 							.readText()
 							.then(read)
-							.catch(_ => {});
+							.catch((_) => {});
 					} else {
 						var input = ui.create.node("textarea", ui.window, { opacity: "0" });
 						input.select();
@@ -205,4 +212,4 @@ export default () => {
 			setTimeout(lib.init.onfree, 1000);
 		},
 	};
-};
+});

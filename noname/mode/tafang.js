@@ -1,23 +1,29 @@
-import { lib, game, ui, get, ai, _status } from "../noname.js";
-export const type = "mode";
-/**
- * @type { () => importModeConfig }
- */
-export default () => {
+"use strict";
+game.import("mode", function (lib, game, ui, get, ai, _status) {
 	return {
 		name: "tafang",
 		canvasUpdates2: [],
-		start() {
+		start: function () {
 			"step 0";
 			_status.gameDrawed = true;
 			lib.init.css(lib.assetURL + "layout/mode", "chess");
 			lib.init.css(lib.assetURL + "layout/mode", "tafang");
 			game.loadMode("chess");
 			"step 1";
-			if (get.is.phoneLayout() && lib.config.touchscreen && !lib.config.show_round_menu && !["system", "menu"].includes(lib.config.swipe_left) && !["system", "menu"].includes(lib.config.swipe_right) && !["system", "menu"].includes(lib.config.swipe_up)) {
+			if (
+				get.is.phoneLayout() &&
+				lib.config.touchscreen &&
+				!lib.config.show_round_menu &&
+				!["system", "menu"].includes(lib.config.swipe_left) &&
+				!["system", "menu"].includes(lib.config.swipe_right) &&
+				!["system", "menu"].includes(lib.config.swipe_up)
+			) {
 				ui.roundmenu.style.display = "";
 			}
-			if (lib.config.player_border == "normal" && (lib.config.layout == "long" || lib.config.layout == "long2")) {
+			if (
+				lib.config.player_border == "normal" &&
+				(lib.config.layout == "long" || lib.config.layout == "long2")
+			) {
 				ui.arena.classList.add("lslim_player");
 			}
 			for (var i in result.element) {
@@ -34,7 +40,17 @@ export default () => {
 			}
 			get.chessDistance = result.get.chessDistance;
 			get.rawAttitude = result.get.rawAttitude;
-			var toLoad = ["addChessPlayer", "addObstacle", "removeObstacle", "isChessNeighbour", "draw2", "updateCanvas2", "setChessInfo", "modeSwapPlayer", "initChess"];
+			var toLoad = [
+				"addChessPlayer",
+				"addObstacle",
+				"removeObstacle",
+				"isChessNeighbour",
+				"draw2",
+				"updateCanvas2",
+				"setChessInfo",
+				"modeSwapPlayer",
+				"initChess",
+			];
 			for (var i = 0; i < toLoad.length; i++) {
 				game[toLoad[i]] = result.game[toLoad[i]];
 			}
@@ -45,7 +61,7 @@ export default () => {
 			ui.placeChess = result.ui.placeChess;
 			ui.click.moveContainer = result.ui.click.moveContainer;
 			for (var i in lib.skill) {
-				if (lib.skill[i].seatRelated) {
+				if (lib.skill[i].changeSeat) {
 					lib.skill[i] = {};
 					if (lib.translate[i + "_info"]) {
 						lib.translate[i + "_info"] = "此模式下不可用";
@@ -69,6 +85,9 @@ export default () => {
 					lib.mechlist.push(i);
 				}
 				lib.character[i] = lib.characterPack.mode_tafang[i];
+				if (!lib.character[i][4]) {
+					lib.character[i][4] = [];
+				}
 			}
 			ui.create.cardsAsync();
 			game.finishCards();
@@ -226,9 +245,9 @@ export default () => {
 			for (i in lib.character) {
 				if (i.indexOf("treasure_") == 0) continue;
 				if (i.indexOf("tafang_mech_") == 0) continue;
-				if (lib.character[i].isMinskin) continue;
+				if (lib.character[i][4].includes("minskin")) continue;
 				if (lib.config.forbidchess.includes(i)) continue;
-				if (lib.character[i].isBoss) continue;
+				if (lib.character[i][4].includes("boss")) continue;
 				if (lib.filter.characterDisabled(i)) continue;
 				list.push(i);
 			}
@@ -416,8 +435,10 @@ export default () => {
 								map[i][j].classList.add("pointerdiv");
 								if (map[i][j].count > count) {
 									map[i][j].classList.add("unselectable");
+									map[i][j].classList.remove("pointerdiv");
 								} else if (i == "zhaomu" && _status.friends.length + selectedZhaomu >= 5) {
 									map[i][j].classList.add("unselectable");
+									map[i][j].classList.remove("pointerdiv");
 								} else if (i == "bufang") {
 									var numbufang = 0;
 									for (var k = 0; k < game.treasures.length; k++) {
@@ -436,7 +457,10 @@ export default () => {
 					};
 					var clickOrder = 0;
 					event.custom.replace.button = function (button) {
-						if (!button.classList.contains("unselectable") || button.classList.contains("selected")) {
+						if (
+							!button.classList.contains("unselectable") ||
+							button.classList.contains("selected")
+						) {
 							button.classList.toggle("selected");
 							button._clickOrder = clickOrder++;
 						}
@@ -560,7 +584,9 @@ export default () => {
 						}
 						event.chooseObstacle = true;
 						event.currentBufang = event.bufang.shift();
-						event.dialog = ui.create.dialog("选择一个位置放置【" + get.translation(event.currentBufang) + "】");
+						event.dialog = ui.create.dialog(
+							"选择一个位置放置【" + get.translation(event.currentBufang) + "】"
+						);
 						if (!_status.auto) {
 							game.pause();
 						} else {
@@ -580,7 +606,12 @@ export default () => {
 					}
 					if (event.chooseObstacle) {
 						game.removeObstacle(event.obstacle.dataset.position);
-						var mech = game.addChessPlayer(event.currentBufang, "treasure", 0, event.obstacle.dataset.position);
+						var mech = game.addChessPlayer(
+							event.currentBufang,
+							"treasure",
+							0,
+							event.obstacle.dataset.position
+						);
 						event.chooseObstacle = false;
 						event.goto(2);
 					} else {
@@ -600,10 +631,17 @@ export default () => {
 					}
 					if (event.zhaomu.length) {
 						event.currentZhaomu = event.zhaomu.shift();
-						event.dialog = ui.create.dialog("选择一个位置安排【" + get.translation(event.currentZhaomu) + "】");
+						event.dialog = ui.create.dialog(
+							"选择一个位置安排【" + get.translation(event.currentZhaomu) + "】"
+						);
 						var size = ui.chesswidth * (ui.chessheight - 1);
 						var clickGrid = function () {
-							var player = game.addChessPlayer(event.currentZhaomu, false, 4, this.dataset.position);
+							var player = game.addChessPlayer(
+								event.currentZhaomu,
+								false,
+								4,
+								this.dataset.position
+							);
 							_status.friends.push(player);
 							if (!game.me.name) {
 								game.me = player;
@@ -627,7 +665,11 @@ export default () => {
 							event.playergrids = [];
 							for (var i = ui.chesswidth; i < size; i++) {
 								if (!lib.posmap[i.toString()]) {
-									var grid = ui.create.div(".player.minskin.playerblank.glow", clickGrid, ui.chess);
+									var grid = ui.create.div(
+										".player.minskin.playerblank.glow",
+										clickGrid,
+										ui.chess
+									);
 									grid.addTempClass("start");
 									ui.placeChess(grid, i);
 									event.playergrids.push(grid);
@@ -691,7 +733,12 @@ export default () => {
 								}
 							}
 							if (list1.length) {
-								var enemy = game.addChessPlayer(_status.characterList.shift(), true, 4, list1.randomRemove());
+								var enemy = game.addChessPlayer(
+									_status.characterList.shift(),
+									true,
+									4,
+									list1.randomRemove()
+								);
 								_status.enemies.push(enemy);
 								event.justadded.push(enemy.name);
 								if (game.players.length == 1) {
@@ -817,14 +864,17 @@ export default () => {
 							restoreScene(current, true);
 						}
 						this.content.innerHTML = "";
-						ui.create.div(".menubutton.large.enter", "进入", this.content, switchScene).link = this.name;
+						ui.create.div(".menubutton.large.enter", "进入", this.content, switchScene).link =
+							this.name;
 						sceneNode.classList.add("lockscroll");
 						var node = this;
 						node._clicking = true;
 						setTimeout(function () {
 							node._clicking = false;
 						}, 700);
-						sceneNode.dx = ui.window.offsetWidth / 2 - (-sceneNode.scrollLeft + this.offsetLeft + this.offsetWidth / 2);
+						sceneNode.dx =
+							ui.window.offsetWidth / 2 -
+							(-sceneNode.scrollLeft + this.offsetLeft + this.offsetWidth / 2);
 						if (Math.abs(sceneNode.dx) < 20) {
 							sceneNode.dx = 0;
 						}
@@ -921,7 +971,10 @@ export default () => {
 			tafang_mech_weixingxianjing_skill: {
 				filter: function (player) {
 					for (var i = 0; i < _status.enemies.length; i++) {
-						if (!_status.enemies[i].isTurnedOver() && get.chessDistance(player, _status.enemies[i]) <= 2) {
+						if (
+							!_status.enemies[i].isTurnedOver() &&
+							get.chessDistance(player, _status.enemies[i]) <= 2
+						) {
 							return true;
 						}
 					}
@@ -930,7 +983,10 @@ export default () => {
 				content: function () {
 					var list = [];
 					for (var i = 0; i < _status.enemies.length; i++) {
-						if (!_status.enemies[i].isTurnedOver() && get.chessDistance(player, _status.enemies[i]) <= 2) {
+						if (
+							!_status.enemies[i].isTurnedOver() &&
+							get.chessDistance(player, _status.enemies[i]) <= 2
+						) {
 							list.push(_status.enemies[i]);
 						}
 					}
@@ -938,7 +994,9 @@ export default () => {
 						game.log("小型陷阱发动");
 						var target = list.randomGet();
 						target.turnOver();
-						game.logv(player, "tafang_mech_weixingxianjing_skill", [target]).node.text.style.display = "none";
+						game.logv(player, "tafang_mech_weixingxianjing_skill", [
+							target,
+						]).node.text.style.display = "none";
 						player.line(target, "green");
 					}
 				},
@@ -975,7 +1033,11 @@ export default () => {
 					}
 					if (list1.length || list2.length) {
 						game.log("能量球发动");
-						game.logv(player, "tafang_mech_nengliangqiu_skill", list1.concat(list2)).node.text.style.display = "none";
+						game.logv(
+							player,
+							"tafang_mech_nengliangqiu_skill",
+							list1.concat(list2)
+						).node.text.style.display = "none";
 					}
 				},
 			},
@@ -998,7 +1060,8 @@ export default () => {
 					if (list.length) {
 						game.log("木桶发动");
 						var targets = list.randomGets(1);
-						game.logv(player, "tafang_mech_mutong_skill", targets).node.text.style.display = "none";
+						game.logv(player, "tafang_mech_mutong_skill", targets).node.text.style.display =
+							"none";
 						player.line(targets, "green");
 						for (var i = 0; i < targets.length; i++) {
 							targets[i].damage("nosource");
@@ -1009,7 +1072,10 @@ export default () => {
 			tafang_mech_guangmingquan_skill: {
 				filter: function (player) {
 					for (var i = 0; i < _status.friends.length; i++) {
-						if (_status.friends[i].hp < _status.friends[i].maxHp && get.chessDistance(player, _status.friends[i]) <= 2) {
+						if (
+							_status.friends[i].hp < _status.friends[i].maxHp &&
+							get.chessDistance(player, _status.friends[i]) <= 2
+						) {
 							return true;
 						}
 					}
@@ -1018,14 +1084,21 @@ export default () => {
 				content: function () {
 					var list = [];
 					for (var i = 0; i < _status.friends.length; i++) {
-						if (_status.friends[i].hp < _status.friends[i].maxHp && get.chessDistance(player, _status.friends[i]) <= 2) {
+						if (
+							_status.friends[i].hp < _status.friends[i].maxHp &&
+							get.chessDistance(player, _status.friends[i]) <= 2
+						) {
 							list.push(_status.friends[i]);
 						}
 					}
 					if (list.length) {
 						game.log("光明泉发动");
 						player.line(list, "green");
-						game.logv(player, "tafang_mech_guangmingquan_skill", list.slice(0)).node.text.style.display = "none";
+						game.logv(
+							player,
+							"tafang_mech_guangmingquan_skill",
+							list.slice(0)
+						).node.text.style.display = "none";
 						while (list.length) {
 							list.shift().recover();
 						}
@@ -1052,7 +1125,11 @@ export default () => {
 					if (list.length) {
 						game.log("机关人发动");
 						player.line(list, "green");
-						game.logv(player, "tafang_mech_jiguanren_skill", list.slice(0)).node.text.style.display = "none";
+						game.logv(
+							player,
+							"tafang_mech_jiguanren_skill",
+							list.slice(0)
+						).node.text.style.display = "none";
 						event.list = list;
 					} else {
 						event.finish();
@@ -1093,7 +1170,9 @@ export default () => {
 						if (he.length) {
 							target.discard(he.randomGet());
 						}
-						game.logv(player, "tafang_mech_gongchengche_skill", [target]).node.text.style.display = "none";
+						game.logv(player, "tafang_mech_gongchengche_skill", [
+							target,
+						]).node.text.style.display = "none";
 					}
 				},
 			},
@@ -1117,25 +1196,43 @@ export default () => {
 			tafang_mech_mutong_skill_info: "每一轮对距离3格以内的一名随机敌人造成1点伤害。",
 			tafang_mech_nengliangqiu: "能量球",
 			tafang_mech_nengliangqiu_skill: "充能",
-			tafang_mech_nengliangqiu_skill_info: "每一轮令距离3格以内的所有友方角色摸一张牌，距离1以内改为摸2张。",
+			tafang_mech_nengliangqiu_skill_info:
+				"每一轮令距离3格以内的所有友方角色摸1张牌，距离1以内改为摸2张。",
 			tafang_mech_jiguanren: "机关人",
 			tafang_mech_jiguanren_skill: "掠夺",
 			tafang_mech_jiguanren_skill_info: "每一轮弃置3格以内的所有敌方角色各1~2张牌。",
 			tafang_mech_gongchengche: "攻城车",
 			tafang_mech_gongchengche_skill: "攻坚",
-			tafang_mech_gongchengche_skill_info: "每一轮对距离2格以内的一名随机敌方角色造成1点火焰伤害，并随机弃置其一张牌。",
+			tafang_mech_gongchengche_skill_info:
+				"每一轮对距离2格以内的一名随机敌方角色造成1点火焰伤害，并随机弃置其一张牌。",
 			tafang_mech_guangmingquan: "光明泉",
 			tafang_mech_guangmingquan_skill: "圣疗",
 			tafang_mech_guangmingquan_skill_info: "每一轮令距离2格以内的所有友方角色各回复1点体力。",
+
+			tafang_mech_dubiaoxianjing: "毒镖陷阱",
+			tafang_mech_dubiaoxianjing_skill: "毒镖",
+			tafang_mech_dubiaoxianjing_skill_info: "每当距离2格以内的一名敌方角色。",
+			tafang_mech_jiqishi: "集合石",
+			tafang_mech_shenmidiaoxiang: "神秘雕像",
+			tafang_mech_shenpanxianjing: "审判之刃",
+			tafang_mech_shiyuansu: "石元素",
+			tafang_mech_wuyashenxiang: "乌鸦神像",
 		},
 		characterPack: {
 			mode_tafang: {
-				tafang_mech_guangmingquan: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 3 },
-				tafang_mech_nengliangqiu: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 3 },
-				tafang_mech_jiguanren: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 3 },
-				tafang_mech_weixingxianjing: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 4 },
-				tafang_mech_mutong: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 4 },
-				tafang_mech_gongchengche: { sex: "", group: "", hp: 3, skills: [], isBoss: true, extraModeData: 4 },
+				// tafang_mech_dubiaoxianjing:['','',4,[],['boss'],2],
+				// tafang_mech_wuyashenxiang:['','',4,[],['boss'],2],
+				// tafang_mech_shenpanxianjing:['','',4,[],['boss'],2],
+				// tafang_mech_shenmidiaoxiang:['','',4,[],['boss'],5],
+				// tafang_mech_shiyuansu:['','',4,[],['boss'],5],
+				// tafang_mech_jiqishi:['','',4,[],['boss'],5],
+
+				tafang_mech_guangmingquan: ["", "", 3, [], ["boss"], 3],
+				tafang_mech_nengliangqiu: ["", "", 3, [], ["boss"], 3],
+				tafang_mech_jiguanren: ["", "", 3, [], ["boss"], 3],
+				tafang_mech_weixingxianjing: ["", "", 3, [], ["boss"], 4],
+				tafang_mech_mutong: ["", "", 3, [], ["boss"], 4],
+				tafang_mech_gongchengche: ["", "", 3, [], ["boss"], 4],
 			},
 		},
 		cardPack: {
@@ -1143,7 +1240,12 @@ export default () => {
 		},
 		posmap: {},
 		help: {
-			塔防模式: "<ul><li>阻上敌人到达最下方的出口，坚持到给定的回合数即获得胜利<li>" + "每轮可获得10个行动点，用来布置机关、招募武将。场上每有一个友方武将，行动点数-1。游戏难度将影响不同操作消耗的行动点数。未用完的行动点将减半（向下取整）并累积到下一轮<li>" + "每一轮在最上方的一个随机位置增加一名敌人，若最上方已有角色，则将其下移一格<li>" + "战场上最多出现3个相同的机关，每个机关在置入战场3轮后消失。战场上最多招募5名友方角色。<li>" + "敌方角色到达底部出口时游戏失败，已方角色到达底部出口，将被移出游戏",
+			塔防模式:
+				"<ul><li>阻上敌人到达最下方的出口，坚持到给定的回合数即获得胜利<li>" +
+				"每轮可获得10个行动点，用来布置机关、招募武将。场上每有一个友方武将，行动点数-1。游戏难度将影响不同操作消耗的行动点数。未用完的行动点将减半（向下取整）并累积到下一轮<li>" +
+				"每一轮在最上方的一个随机位置增加一名敌人，若最上方已有角色，则将其下移一格<li>" +
+				"战场上最多出现3个相同的机关，每个机关在置入战场3轮后消失。战场上最多招募5名友方角色。<li>" +
+				"敌方角色到达底部出口时游戏失败，已方角色到达底部出口，将被移出游戏",
 		},
 	};
-};
+});

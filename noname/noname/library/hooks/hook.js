@@ -1,7 +1,7 @@
 import * as buildin from "./buildin.js";
 
 /**
- * @template {NonameHookType} HookType
+ * @template {import("./interface.js").NonameHookType} HookType
  * @template {keyof HookType} Name
  * @extends {Array<HookType[Name]>}
  */
