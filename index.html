@@ -48,9 +48,19 @@
       border-radius: 6px;
       z-index: 1000;
     }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 点击区域，自动播放后移除 -->
+  <div id="overlay"></div>
 
   <!-- 静音按钮 -->
   <button id="mute-btn">🔊 Mute</button>
@@ -73,34 +83,27 @@
   <script>
     const audio = document.getElementById("bg-music");
     const muteBtn = document.getElementById("mute-btn");
+    const overlay = document.getElementById("overlay");
 
-    // 设置播放音量和播放逻辑
-    const playOnInteraction = () => {
+    // 设置音量并播放
+    const playAudio = () => {
       audio.volume = 0.4;
       audio.play().then(() => {
         console.log("音频播放成功");
       }).catch((err) => {
         console.error("音频播放失败", err);
       });
-
-      // 移除监听器，确保只触发一次
-      window.removeEventListener("click", playOnInteraction);
-      window.removeEventListener("touchstart", playOnInteraction);
+      overlay.remove(); // 移除点击区域
     };
 
-    // 支持手机和电脑的交互事件
-    window.addEventListener("click", playOnInteraction, { once: true });
-    window.addEventListener("touchstart", playOnInteraction, { once: true });
+    // 绑定点击（支持 iOS）
+    overlay.addEventListener("click", playAudio, { once: true });
+    overlay.addEventListener("touchstart", playAudio, { once: true });
 
-    // 静音按钮逻辑
-    muteBtn.addEventListener("click", function () {
-      if (audio.muted) {
-        audio.muted = false;
-        muteBtn.textContent = "🔊 Mute";
-      } else {
-        audio.muted = true;
-        muteBtn.textContent = "🔇 Unmute";
-      }
+    // 静音按钮
+    muteBtn.addEventListener("click", () => {
+      audio.muted = !audio.muted;
+      muteBtn.textContent = audio.muted ? "🔇 Unmute" : "🔊 Mute";
     });
   </script>
 
