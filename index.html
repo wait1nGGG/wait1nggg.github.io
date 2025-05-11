@@ -64,24 +64,19 @@
 </head>
 <body>
 
-  <!-- 透明全屏点击按钮 -->
-  <button id="start-btn" aria-label="开始播放"></button>
-
-  <!-- 静音按钮 -->
+  <button id="start-btn" aria-label="开始播放" ontouchstart=""></button>
   <button id="mute-btn">🔊 Mute</button>
 
   <div class="container">
     <h1>なんで春日影やったの!?</h1>
     <div class="subtitle">为什么要演奏春日影？！</div>
     <div class="subtitle">Why did we play Haruhikage!?</div>
-
-    <!-- 插入图片 -->
     <img src="haruhikage.png">
   </div>
 
-  <!-- 背景音乐 -->
   <audio id="bg-music" loop>
     <source src="assets/haruhikage.ogg" type="audio/ogg">
+    <source src="assets/haruhikage.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
@@ -90,24 +85,56 @@
     const muteBtn = document.getElementById("mute-btn");
     const startBtn = document.getElementById("start-btn");
 
-    // 播放音乐并移除全屏透明按钮
-    startBtn.addEventListener("click", () => {
+    // 预加载设置
+    window.addEventListener('DOMContentLoaded', () => {
       audio.volume = 0.5;
-      audio.play().then(() => {
-        console.log("音频播放成功");
-        startBtn.remove(); // 移除透明按钮
-        muteBtn.style.display = "block"; // 显示静音按钮
-      }).catch((err) => {
-        console.error("音频播放失败", err);
-        alert("音乐播放失败，请重新点击");
-      });
+      audio.preload = "auto";
+      audio.muted = false;
+      console.log("音频预加载完成");
     });
 
-    // 静音按钮逻辑
+    // 播放逻辑
+    startBtn.addEventListener("click", async () => {
+      try {
+        if (audio.readyState < 3) {
+          console.log("正在加载音频...");
+          audio.load();
+        }
+
+        // iOS 特殊处理
+        if (audio.duration === 0) {
+          audio.currentTime = 0.1;
+          console.log("iOS 设备兼容处理");
+        }
+
+        await audio.play();
+        console.log("音频开始播放");
+
+        // 微信浏览器处理
+        if (typeof WeixinJSBridge !== "undefined") {
+          console.log("微信浏览器环境检测");
+          WeixinJSBridge.invoke('getNetworkType', {}, () => audio.play());
+        }
+
+        startBtn.remove();
+        muteBtn.style.display = "block";
+      } catch (err) {
+        console.error("播放失败:", err);
+        console.info("请手动点击允许音频播放");
+      }
+    });
+
+    // 静音控制
     muteBtn.addEventListener("click", () => {
       audio.muted = !audio.muted;
       muteBtn.textContent = audio.muted ? "🔇 Unmute" : "🔊 Mute";
+      console.log(`静音状态: ${audio.muted}`);
     });
+
+    // 设备检测（仅控制台输出）
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      console.log("移动端设备检测");
+    }
   </script>
 
 </body>
