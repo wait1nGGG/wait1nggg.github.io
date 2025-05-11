@@ -63,26 +63,31 @@
     <img src="haruhikage.png">
   </div>
 
-  <!-- 背景音乐 -->
-  <audio id="bg-music" autoplay loop>
-    <source src="https://wait1nggg.github.io/assets/haruhikage.ogg" type="audio/ogg">
+  <!-- 背景音乐（等待用户触发） -->
+  <audio id="bg-music" loop>
+    <source src="assets/haruhikage.ogg" type="audio/ogg">
     Your browser does not support the audio element.
   </audio>
 
   <script>
     const audio = document.getElementById("bg-music");
-
-    audio.addEventListener('canplaythrough', () => {
-      console.log("音频加载成功");
-    });
-
-    audio.addEventListener('error', () => {
-      console.error("音频加载失败");
-    });
-
     const muteBtn = document.getElementById("mute-btn");
 
-    muteBtn.addEventListener("click", function() {
+    // 用户点击页面任意处开始播放音频
+    const playOnClick = () => {
+      audio.volume = 0.5; // 设置音量为 50%
+      audio.play().then(() => {
+        console.log("音频播放成功");
+      }).catch((err) => {
+        console.error("音频播放失败", err);
+      });
+      document.body.removeEventListener("click", playOnClick);
+    };
+
+    document.body.addEventListener("click", playOnClick);
+
+    // 静音按钮控制
+    muteBtn.addEventListener("click", function () {
       if (audio.muted) {
         audio.muted = false;
         muteBtn.textContent = "🔊 Mute";
