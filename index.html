@@ -46,6 +46,7 @@
       cursor: pointer;
       font-size: 14px;
       border-radius: 6px;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -63,7 +64,7 @@
     <img src="haruhikage.png">
   </div>
 
-  <!-- 背景音乐（等待用户触发） -->
+  <!-- 背景音乐 -->
   <audio id="bg-music" loop>
     <source src="assets/haruhikage.ogg" type="audio/ogg">
     Your browser does not support the audio element.
@@ -73,20 +74,25 @@
     const audio = document.getElementById("bg-music");
     const muteBtn = document.getElementById("mute-btn");
 
-    // 用户点击页面任意处开始播放音频
-    const playOnClick = () => {
-      audio.volume = 0.4; // 设置音量为 50%
+    // 设置播放音量和播放逻辑
+    const playOnInteraction = () => {
+      audio.volume = 0.4;
       audio.play().then(() => {
         console.log("音频播放成功");
       }).catch((err) => {
         console.error("音频播放失败", err);
       });
-      document.body.removeEventListener("click", playOnClick);
+
+      // 移除监听器，确保只触发一次
+      window.removeEventListener("click", playOnInteraction);
+      window.removeEventListener("touchstart", playOnInteraction);
     };
 
-    document.body.addEventListener("click", playOnClick);
+    // 支持手机和电脑的交互事件
+    window.addEventListener("click", playOnInteraction, { once: true });
+    window.addEventListener("touchstart", playOnInteraction, { once: true });
 
-    // 静音按钮控制
+    // 静音按钮逻辑
     muteBtn.addEventListener("click", function () {
       if (audio.muted) {
         audio.muted = false;
