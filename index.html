@@ -1,9 +1,88 @@
-<!doctype html>
-<html>
-  <head>
-    <title>SUS</title>
-  </head>
-  <body>
-    <p>Why r u checking this website</p>
-  </body>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>なんで春日影やったの!?</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin-top: 100px;
+    }
+
+    h1 {
+      color: #cc0000;
+      font-size: 60px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    img {
+      max-width: 80%;
+      height: auto;
+      margin-top: 40px;
+    }
+
+    #mute-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #fff;
+      border: 2px solid #333;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 静音按钮 -->
+  <button id="mute-btn">🔊 Mute</button>
+
+  <div class="container">
+    <h1>なんで春日影やったの!?</h1>
+    <div class="subtitle">为什么要演奏春日影？！</div>
+    <div class="subtitle">Why did we play Haruhikage!?</div>
+
+    <!-- 插入图片 -->
+    <img src="haruhikage.png">
+  </div>
+
+  <!-- 背景音乐 -->
+  <audio id="bg-music" autoplay loop>
+    <source src="haruhikage.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const audio = document.getElementById("bg-music");
+    const muteBtn = document.getElementById("mute-btn");
+
+    muteBtn.addEventListener("click", function() {
+      if (audio.muted) {
+        audio.muted = false;
+        muteBtn.textContent = "🔊 Mute";
+      } else {
+        audio.muted = true;
+        muteBtn.textContent = "🔇 Unmute";
+      }
+    });
+  </script>
+
+</body>
 </html>
