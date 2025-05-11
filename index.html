@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>なんで春日影やったの!?</title>
+  <title>不要点页面！！</title>
   <style>
     body {
       font-family: "Arial", sans-serif;
@@ -10,10 +10,27 @@
       background-color: #f0f0f0;
       margin: 0;
       padding: 0;
+      overflow: hidden;
+    }
+
+    #warning-title {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff0000;
+      font-size: 60px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      z-index: 1001;
+      animation: pulse 1.5s infinite;
     }
 
     .container {
       margin-top: 100px;
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
     }
 
     h1 {
@@ -21,6 +38,7 @@
       font-size: 60px;
       font-weight: bold;
       margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
 
     .subtitle {
@@ -28,12 +46,18 @@
       color: #333;
       margin-bottom: 10px;
       line-height: 1.6;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
     }
 
     img {
       max-width: 80%;
       height: auto;
       margin-top: 40px;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 1s ease;
     }
 
     #mute-btn {
@@ -48,6 +72,8 @@
       border-radius: 6px;
       z-index: 1000;
       display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
 
     #start-btn {
@@ -60,10 +86,17 @@
       cursor: pointer;
       z-index: 999;
     }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.05); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
   </style>
 </head>
 <body>
 
+  <div id="warning-title">不要点页面！！</div>
   <button id="start-btn" aria-label="开始播放" ontouchstart=""></button>
   <button id="mute-btn">🔊 Mute</button>
 
@@ -71,7 +104,7 @@
     <h1>なんで春日影やったの!?</h1>
     <div class="subtitle">为什么要演奏春日影？！</div>
     <div class="subtitle">Why did we play Haruhikage!?</div>
-    <img src="haruhikage.png">
+    <img src="images/haruhikage.png" alt="Haruhikage">
   </div>
 
   <audio id="bg-music" loop>
@@ -84,43 +117,75 @@
     const audio = document.getElementById("bg-music");
     const muteBtn = document.getElementById("mute-btn");
     const startBtn = document.getElementById("start-btn");
+    const warningTitle = document.getElementById("warning-title");
+    const container = document.querySelector(".container");
+    const subtitles = document.querySelectorAll(".subtitle");
+    const pageImage = document.querySelector("img");
 
-    // 预加载设置
+    // 初始化设置
     window.addEventListener('DOMContentLoaded', () => {
       audio.volume = 0.5;
       audio.preload = "auto";
       audio.muted = false;
-      console.log("音频预加载完成");
+      console.log("[系统] 音频预加载完成");
+      
+      // 移动端检测
+      if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        console.log("[设备] 移动端设备检测");
+        document.body.classList.add('mobile');
+      }
     });
 
     // 播放逻辑
     startBtn.addEventListener("click", async () => {
       try {
         if (audio.readyState < 3) {
-          console.log("正在加载音频...");
+          console.log("[音频] 正在加载音频资源...");
           audio.load();
         }
 
         // iOS 特殊处理
         if (audio.duration === 0) {
           audio.currentTime = 0.1;
-          console.log("iOS 设备兼容处理");
+          console.log("[设备] iOS 兼容处理");
         }
 
         await audio.play();
-        console.log("音频开始播放");
+        console.log("[音频] 播放成功");
+
+        // 界面切换
+        warningTitle.style.display = "none";
+        container.style.display = "block";
+        setTimeout(() => {
+          container.style.opacity = 1;
+          muteBtn.style.display = "block";
+          setTimeout(() => muteBtn.style.opacity = 1, 100);
+          
+          // 元素动画
+          subtitles.forEach((sub, index) => {
+            setTimeout(() => {
+              sub.style.opacity = 1;
+              sub.style.transform = "translateY(0)";
+            }, 300 + index * 200);
+          });
+          
+          setTimeout(() => {
+            pageImage.style.opacity = 1;
+            pageImage.style.transform = "scale(1)";
+          }, 1000);
+        }, 500);
+
+        startBtn.style.display = "none";
 
         // 微信浏览器处理
         if (typeof WeixinJSBridge !== "undefined") {
-          console.log("微信浏览器环境检测");
+          console.log("[环境] 微信浏览器检测");
           WeixinJSBridge.invoke('getNetworkType', {}, () => audio.play());
         }
 
-        startBtn.remove();
-        muteBtn.style.display = "block";
       } catch (err) {
-        console.error("播放失败:", err);
-        console.info("请手动点击允许音频播放");
+        console.error("[错误] 播放失败:", err);
+        console.info("[提示] 需要手动允许音频播放");
       }
     });
 
@@ -128,13 +193,15 @@
     muteBtn.addEventListener("click", () => {
       audio.muted = !audio.muted;
       muteBtn.textContent = audio.muted ? "🔇 Unmute" : "🔊 Mute";
-      console.log(`静音状态: ${audio.muted}`);
+      console.log(`[状态] 静音: ${audio.muted}`);
     });
 
-    // 设备检测（仅控制台输出）
-    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      console.log("移动端设备检测");
-    }
+    // 防止意外点击
+    document.addEventListener('click', (e) => {
+      if (e.target === document.body) {
+        e.preventDefault();
+      }
+    }, true);
   </script>
 
 </body>
