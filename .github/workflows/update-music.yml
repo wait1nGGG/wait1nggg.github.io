@@ -3,19 +3,35 @@ on:
   push:
     paths:
       - 'music/**'
+    branches: [ main ]  # 如果是master分支改为master
+
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 添加写权限
+    
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取完整提交历史
+
+    - name: Setup jq
+      run: sudo apt-get install -y jq  # 安装JSON处理工具
+
     - name: Generate files.json
       run: |
         cd music
         ls -p | grep -v / | grep -v 'index.html' | grep -v files.json | jq -R '[.]' | jq -s '{files: .}' > files.json
+
     - name: Commit changes
       run: |
         git config --global user.name "GitHub Bot"
         git config --global user.email "github-actions@github.com"
         git add music/files.json
-        git commit -m "Auto-update music list" || echo "No changes to commit"
-        git push
+        if git diff-index --quiet HEAD --; then
+          echo "没有变化需要提交"
+        else
+          git commit -m "🤖 Auto-update music list"
+          git push
+        fi
