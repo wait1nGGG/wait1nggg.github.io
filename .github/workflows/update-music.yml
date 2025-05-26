@@ -1,0 +1,21 @@
+name: Update Music List
+on:
+  push:
+    paths:
+      - 'music/**'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Generate files.json
+      run: |
+        cd music
+        ls -p | grep -v / | grep -v 'index.html' | grep -v files.json | jq -R '[.]' | jq -s '{files: .}' > files.json
+    - name: Commit changes
+      run: |
+        git config --global user.name "GitHub Bot"
+        git config --global user.email "github-actions@github.com"
+        git add music/files.json
+        git commit -m "Auto-update music list" || echo "No changes to commit"
+        git push
