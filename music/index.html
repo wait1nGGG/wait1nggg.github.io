@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐库 | wait1nggg</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .file-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .file-icon {
+            width: 24px;
+            height: 24px;
+        }
+        #toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #212529;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 我的音乐库</h1>
+    <div id="file-list"></div>
+    <div id="toast">✅ 链接已复制！</div>
+
+    <script>
+        // 自动获取当前页面路径
+        const baseUrl = window.location.href.replace(/\/$/, '');
+        
+        // 文件类型图标映射
+        const icons = {
+            mp3: '🎸',
+            wav: '🎧',
+            flac: '🎼',
+            default: '📄'
+        };
+
+        // 加载文件列表
+        fetch('files.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('file-list');
+                data.files.forEach(file => {
+                    const ext = file.split('.').pop().toLowerCase();
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <span class="file-icon">${icons[ext] || icons.default}</span>
+                        <span class="file-name">${file}</span>
+                    `;
+                    
+                    // 点击复制功能
+                    item.addEventListener('click', async () => {
+                        const fileUrl = `${baseUrl}/${encodeURIComponent(file)}`;
+                        try {
+                            await navigator.clipboard.writeText(fileUrl);
+                            showToast();
+                        } catch (err) {
+                            prompt('请手动复制链接:', fileUrl);
+                        }
+                    });
+                    container.appendChild(item);
+                });
+            })
+            .catch(err => {
+                console.error('加载文件列表失败:', err);
+                document.getElementById('file-list').innerHTML = 
+                    '<p>⚠️ 文件加载失败，请稍后刷新</p>';
+            });
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 2000);
+        }
+    </script>
+</body>
+</html>
